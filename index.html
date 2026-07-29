@@ -140,6 +140,16 @@
   nav .links a{cursor:pointer;transition:color .3s;color:inherit;text-decoration:none}
   nav .links a:hover{color:var(--goldh)}
 
+  /* ---------- MÓVIL: barra de arriba limpia (solo RASH centrado) ---------- */
+  @media (max-width:640px){
+    nav{padding:18px 20px;justify-content:center}
+    nav .brand{font-size:17px;letter-spacing:.34em;padding-left:.34em}
+    nav .links{display:none}
+    .heroSub{bottom:8vh;font-size:9px;letter-spacing:.42em}
+    .cue{font-size:9px;letter-spacing:.34em}
+    section.block{padding:11vh 7vw;min-height:70vh}
+  }
+
   .cue{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:20;font-size:10px;
     letter-spacing:.42em;color:var(--soft);text-transform:uppercase;opacity:0;transition:opacity 1s ease 3.0s}
   body.go .cue{opacity:.5;animation:bob 2.8s ease-in-out infinite 3.2s}
@@ -225,7 +235,13 @@
     <p>Accesorios ecuestres de lujo en plata 925, oro 18k y cuero noble. La cabeza RASH facetada como lenguaje de metal nativo — para la amazona y para el caballo.</p>
   </section>
 
-  <footer id="contacto">RASH · Sport Horses — Cría · Análisis · Competición · Atelier · Joyería</footer>
+  <section class="block" id="investors">
+    <div class="eyebrow">06 · Investment</div>
+    <h2>RASH Group</h2>
+    <p>Una firma ecuestre integrada — cría, análisis biomecánico, competición, atelier y joyería bajo una sola marca. RASH Group abre su mesa a socios estratégicos que quieran construir la referencia europea del salto de lujo. Conversaciones de inversión, bajo invitación.</p>
+  </section>
+
+  <footer id="contacto">RASH Group · Sport Horses — Cría · Análisis · Competición · Atelier · Joyería</footer>
 
 <script>
 (function(){
