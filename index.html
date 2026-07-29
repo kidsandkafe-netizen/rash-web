@@ -11,12 +11,15 @@
   :root{--ink:#ece7dd;--gold:#c69e4a;--goldh:#e6c477;--soft:#8b877f;--bg0:#020203;}
   *{margin:0;padding:0;box-sizing:border-box}
   html{scroll-behavior:smooth}
-  body{background:var(--bg0);color:var(--ink);font-family:'Manrope',sans-serif;overflow-x:hidden}
+  body{background:var(--bg0);color:var(--ink);font-family:'Manrope',sans-serif;overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
 
   /* ---------- FONDO NEGRO PREMIUM (estudio profundo) ---------- */
   .bg{position:fixed;inset:0;z-index:0;background:#020203;}
-  .bg::before{content:"";position:absolute;inset:0;
-    background:radial-gradient(42% 34% at 50% 40%, rgba(150,170,205,.17), rgba(90,105,130,.05) 46%, transparent 70%);}
+  .bg::before{content:"";position:absolute;inset:0;will-change:opacity,transform;
+    background:radial-gradient(42% 34% at 50% 40%, rgba(150,170,205,.17), rgba(90,105,130,.05) 46%, transparent 70%);
+    animation:lumBreath 11s ease-in-out infinite;}
+  @keyframes lumBreath{0%,100%{opacity:.9;transform:scale(1)}50%{opacity:1;transform:scale(1.04)}}
   .bg::after{content:"";position:absolute;inset:0;
     background:radial-gradient(120% 92% at 50% 42%, transparent 50%, rgba(0,0,0,.55) 84%, #000 100%);}
   /* FONDO PICADO: campo de facetas casi-negras (lenguaje del logo) con profundidad + parallax */
@@ -70,8 +73,15 @@
     background:radial-gradient(closest-side, rgba(180,198,230,.20), rgba(150,170,205,.05) 52%, transparent 76%);
     filter:blur(34px);}
 
-  .grain{position:fixed;inset:0;z-index:6;pointer-events:none;opacity:.045;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+  .grain{position:fixed;inset:-6%;z-index:6;pointer-events:none;opacity:.05;will-change:transform,opacity;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    animation:grainFlick .5s steps(2) infinite;}
+  @keyframes grainFlick{
+    0%{transform:translate(0,0);opacity:.05}
+    25%{transform:translate(-1.5%,1%);opacity:.038}
+    50%{transform:translate(1%,-1.5%);opacity:.052}
+    75%{transform:translate(-1%,1.5%);opacity:.04}
+    100%{transform:translate(1.5%,-1%);opacity:.05}}
 
   /* ---------- ESCENARIO: la cabeza RASH (render plata) con giro 3D ---------- */
   #heroWrap{position:fixed;left:0;right:0;top:0;height:78vh;z-index:5;
@@ -132,7 +142,7 @@
 
   /* ---------- NAV ---------- */
   nav{position:fixed;top:0;left:0;right:0;z-index:30;display:flex;
-    justify-content:space-between;align-items:center;padding:24px 42px;
+    justify-content:flex-end;align-items:center;padding:24px 42px;
     opacity:0;transform:translateY(-8px);transition:opacity 1.4s ease 2.6s,transform 1.4s ease 2.6s}
   body.go nav{opacity:1;transform:none}
   nav .brand{font-family:'Cormorant Garamond',serif;font-size:22px;letter-spacing:.5em;padding-left:.5em}
@@ -193,7 +203,6 @@
   <div class="loader" id="loader">R A S H</div>
 
   <nav>
-    <div class="brand">RASH</div>
     <div class="links">
       <a href="#cria">CRÍA</a><a href="#analisis">ANÁLISIS</a>
       <a href="#competicion">COMPETICIÓN</a><a href="#atelier">ATELIER</a>
@@ -251,7 +260,7 @@
   var title=document.querySelector('.heroTitle');
   var shaft=document.querySelector('.shaft');
   var loader=document.getElementById('loader');
-  var mx=0,my=0, tmx=0,tmy=0, t0=null, INTRO=2000, sp=0;
+  var mx=0,my=0, tmx=0,tmy=0, t0=null, INTRO=2600, sp=0;
 
   function ease(x){return 1-Math.pow(1-x,3);}   // easeOutCubic
 
@@ -282,7 +291,8 @@
     // PARALLAX: fondo picado deriva al lado contrario = profundidad real
     if(facets){
       var fx = -mx*15, fy = -my*11 + Math.sin(t*0.4)*3;
-      facets.style.transform = 'translate('+fx.toFixed(1)+'px,'+fy.toFixed(1)+'px) scale(1.1)';
+      var fscale = 1.10 + Math.sin(t*0.13)*0.022;   // Ken Burns: respiracion lenta de camara
+      facets.style.transform = 'translate('+fx.toFixed(1)+'px,'+fy.toFixed(1)+'px) scale('+fscale.toFixed(4)+')';
     }
     if(haze){
       haze.style.transform = 'translate('+(-mx*7).toFixed(1)+'px,'+(-my*5).toFixed(1)+'px)';
