@@ -56,8 +56,8 @@
     background:radial-gradient(70% 58% at 50% 42%,
       rgba(226,236,255,.24) 0%, rgba(196,212,244,.12) 34%,
       rgba(150,170,208,.05) 60%, transparent 80%);}
-  body.go .lightwash{animation:washIn 4.6s cubic-bezier(.33,0,.15,1) both;}
-  @keyframes washIn{0%{opacity:0}55%{opacity:1}100%{opacity:.34}}
+  body.go .lightwash{animation:washIn 5s cubic-bezier(.62,0,.2,1) both;}
+  @keyframes washIn{0%{opacity:0}68%{opacity:1}100%{opacity:.34}}
   /* FOCO DE ESTUDIO volumetrico: cono de luz con bordes suaves (sin aristas) */
   .shaft{position:fixed;left:0;right:0;top:0;height:100vh;z-index:1;pointer-events:none;
     opacity:0;transition:opacity 2.6s ease .3s;mix-blend-mode:screen;}
@@ -119,13 +119,13 @@
     transform-style:preserve-3d;will-change:transform,filter;opacity:0;transform:scale(.72);
     filter:contrast(1.035) saturate(1.02) brightness(1.01)}
   /* REVELADO DE CINE: la cabeza emerge de la oscuridad segun la luz la descubre */
-  body.go #hero{animation:heroReveal 4.6s cubic-bezier(.33,0,.15,1) both;}
+  body.go #hero{animation:heroReveal 5s cubic-bezier(.62,0,.2,1) both;}
   @keyframes heroReveal{
-    0%  {filter:brightness(.05) contrast(1.28) saturate(.66)}
-    100%{filter:brightness(1.01) contrast(1.035) saturate(1.02)}}
+    0%  {filter:brightness(0)   contrast(1.5)  saturate(.5)}
+    100%{filter:brightness(1.02) contrast(1.07) saturate(1.06)}}
   /* la luz clave crece a la vez, de forma continua = no se nota el cambio */
-  body.go #hero .keylight{animation:keyIn 4.6s cubic-bezier(.33,0,.15,1) both;}
-  @keyframes keyIn{0%{opacity:0}100%{opacity:.9}}
+  body.go #hero .keylight{animation:keyIn 5s cubic-bezier(.62,0,.2,1) both;}
+  @keyframes keyIn{0%{opacity:0}100%{opacity:.95}}
   /* GROSOR: canto solido continuo = muchas sombras de 1px encadenadas (sin huecos, sin fantasmas) */
   #hero .head{position:absolute;inset:0;width:100%;height:100%;
     background-image:var(--h);background-size:100% 100%;background-repeat:no-repeat;
@@ -355,7 +355,10 @@
     var floatY = Math.sin(t*0.6)*6;              // flotar suave
     // el hero se disuelve y sube al hacer scroll (no queda flotando)
     var lift = -sp*90;
-    hero.style.opacity = e*(1-sp);
+    // la opacidad se materializa CON la luz (invisible al principio, no silueta oscura)
+    var op = Math.min((ts-t0)/4600, 1);
+    var eo = op*op*op;                           // ease-in fuerte: nace de la nada segun la luz la descubre
+    hero.style.opacity = eo*(1-sp);
     hero.style.transform =
       'translateY('+(floatY+lift).toFixed(1)+'px) scale('+scale.toFixed(3)+') '+
       'rotateY('+ry.toFixed(2)+'deg) rotateX('+rx.toFixed(2)+'deg)';
