@@ -15,19 +15,22 @@
     -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
 
   /* ---------- FONDO NEGRO PREMIUM (estudio profundo) ---------- */
-  .bg{position:fixed;inset:0;z-index:0;background:#020203;}
+  .bg{position:fixed;inset:0;z-index:0;
+    background:linear-gradient(180deg,#06070a 0%, #030304 52%, #000 100%);}
   .bg::before{content:"";position:absolute;inset:0;will-change:opacity,transform;
-    background:radial-gradient(42% 34% at 50% 40%, rgba(150,170,205,.17), rgba(90,105,130,.05) 46%, transparent 70%);
+    background:
+      radial-gradient(28% 22% at 50% 38%, rgba(214,190,140,.11), transparent 62%),
+      radial-gradient(42% 34% at 50% 40%, rgba(150,170,205,.16), rgba(90,105,130,.05) 46%, transparent 70%);
     animation:lumBreath 11s ease-in-out infinite;}
-  @keyframes lumBreath{0%,100%{opacity:.9;transform:scale(1)}50%{opacity:1;transform:scale(1.04)}}
+  @keyframes lumBreath{0%,100%{opacity:.92;transform:scale(1)}50%{opacity:1;transform:scale(1.035)}}
   .bg::after{content:"";position:absolute;inset:0;
-    background:radial-gradient(120% 92% at 50% 42%, transparent 50%, rgba(0,0,0,.55) 84%, #000 100%);}
+    background:radial-gradient(115% 88% at 50% 42%, transparent 42%, rgba(0,0,0,.5) 72%, rgba(0,0,0,.9) 92%, #000 100%);}
   /* FONDO PICADO: campo de facetas casi-negras (lenguaje del logo) con profundidad + parallax */
   .facets{position:fixed;inset:-8%;z-index:0;background-size:cover;background-position:center;
     opacity:0;will-change:transform;transition:opacity 2.8s ease .4s;
     -webkit-mask-image:radial-gradient(72% 62% at 50% 44%, #000 26%, rgba(0,0,0,.35) 60%, transparent 84%);
             mask-image:radial-gradient(72% 62% at 50% 44%, #000 26%, rgba(0,0,0,.35) 60%, transparent 84%);}
-  body.go .facets{opacity:.55}
+  body.go .facets{opacity:.44}
   /* CABALLO AL GALOPE fantasma: solo el efecto, enterrado en el fondo */
   .gallop{display:none;position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden;
     opacity:0;transition:opacity 3.4s ease 1.2s;mix-blend-mode:screen;
@@ -123,19 +126,19 @@
     opacity:0;transform:translateY(16px);
     transition:opacity 1.6s ease 1.5s, transform 1.8s ease 1.5s;}
   body.go .heroTitle{opacity:1;transform:none}
-  .heroTitle .wm{width:min(37vw,350px);aspect-ratio:4141/636;
+  .heroTitle .wm{width:min(36vw,338px);aspect-ratio:4141/636;
     -webkit-mask-size:contain;mask-size:contain;
     -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
     -webkit-mask-position:center;mask-position:center;
-    background:linear-gradient(100deg,#7d7970 16%,#ffffff 45%,#e6c477 55%,#9a8f74 74%,#7d7970 90%);
-    background-size:220% auto;
-    animation:shine 7s linear infinite 1.8s, wmglow 4s ease-in-out infinite 2s;
+    background:linear-gradient(100deg,#6f6b62 12%,#cfcabf 34%,#ffffff 46%,#e6c477 55%,#a89a7c 70%,#6f6b62 92%);
+    background-size:230% auto;
+    animation:shine 10s linear infinite 1.8s, wmglow 6s ease-in-out infinite 2s;
     filter:drop-shadow(0 4px 14px rgba(0,0,0,.45));}
-  @keyframes shine{to{background-position:220% center}}
-  /* efecto premium: halo champan que respira alrededor de las letras */
+  @keyframes shine{to{background-position:230% center}}
+  /* efecto premium: halo champan que respira suave alrededor de las letras */
   @keyframes wmglow{
-    0%,100%{filter:drop-shadow(0 4px 14px rgba(0,0,0,.45)) drop-shadow(0 0 8px rgba(230,196,119,.22));}
-    50%    {filter:drop-shadow(0 5px 16px rgba(0,0,0,.45)) drop-shadow(0 0 26px rgba(233,198,122,.62));}}
+    0%,100%{filter:drop-shadow(0 4px 14px rgba(0,0,0,.45)) drop-shadow(0 0 10px rgba(230,196,119,.18));}
+    50%    {filter:drop-shadow(0 5px 15px rgba(0,0,0,.45)) drop-shadow(0 0 20px rgba(233,198,122,.42));}}
   .heroSub{position:fixed;left:0;right:0;bottom:9.4vh;z-index:12;text-align:center;
     font-size:10px;letter-spacing:.5em;text-transform:uppercase;color:var(--soft);
     opacity:0;transition:opacity 1.4s ease 2.3s}
@@ -182,13 +185,26 @@
   /* ---------- SECCIONES: LOS 5 MUNDOS ---------- */
   section.block{position:relative;z-index:10;min-height:76vh;display:flex;flex-direction:column;
     align-items:center;justify-content:center;text-align:center;padding:13vh 8vw;
-    background:var(--bg0);border-top:1px solid rgba(120,110,90,.12)}
+    background:var(--bg0)}
+  /* filete dorado centrado que separa apartados (elegante, no linea plana) */
+  section.block+section.block::before, footer::before{content:"";position:absolute;top:0;left:50%;
+    transform:translateX(-50%);width:min(58%,500px);height:1px;
+    background:linear-gradient(90deg,transparent,rgba(198,158,74,.32),transparent)}
+  /* primer apartado: se funde con el hero (transparente arriba -> negro) sin corte */
+  section.block#cria{background:linear-gradient(180deg, rgba(2,2,3,0) 0%, rgba(2,2,3,.55) 16%, var(--bg0) 34%);padding-top:19vh}
   section.block .eyebrow{font-size:11px;letter-spacing:.4em;text-transform:uppercase;color:var(--gold);margin-bottom:18px}
   section.block h2{font-family:'Cormorant Garamond',serif;font-size:clamp(30px,5vw,58px);
     letter-spacing:.02em;margin-bottom:20px;font-weight:500}
   section.block p{max-width:640px;color:var(--soft);line-height:1.95;font-size:clamp(14px,1.6vw,17px)}
+  /* entrada elegante escalonada al hacer scroll */
+  section.block .eyebrow,section.block h2,section.block p{
+    opacity:0;transform:translateY(32px);will-change:opacity,transform;
+    transition:opacity 1.7s cubic-bezier(.16,.7,.2,1), transform 1.7s cubic-bezier(.16,.7,.2,1);}
+  section.block.in .eyebrow{opacity:1;transform:none;transition-delay:.08s}
+  section.block.in h2{opacity:1;transform:none;transition-delay:.32s}
+  section.block.in p{opacity:1;transform:none;transition-delay:.56s}
   footer{position:relative;z-index:10;text-align:center;padding:60px 20px;color:var(--soft);
-    font-size:11px;letter-spacing:.3em;text-transform:uppercase;background:var(--bg0);border-top:1px solid rgba(120,110,90,.12)}
+    font-size:11px;letter-spacing:.3em;text-transform:uppercase;background:var(--bg0)}
 </style>
 </head>
 <body>
@@ -328,6 +344,19 @@
     tmx = (ev.clientX/innerWidth  - 0.5)*2;
     tmy = (ev.clientY/innerHeight - 0.5)*2;
   });
+
+  // entrada escalonada de los apartados al entrar en pantalla (una sola vez)
+  var blocks=document.querySelectorAll('section.block');
+  if('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if(en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); }
+      });
+    },{threshold:.2, rootMargin:'0px 0px -8% 0px'});
+    blocks.forEach(function(b){ io.observe(b); });
+  } else {
+    blocks.forEach(function(b){ b.classList.add('in'); });   // fallback: mostrar todo
+  }
 
   function start(){
     document.body.classList.add('go');
