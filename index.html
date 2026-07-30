@@ -203,8 +203,14 @@
   section.block.in .eyebrow{opacity:1;transform:none;transition-delay:.08s}
   section.block.in h2{opacity:1;transform:none;transition-delay:.32s}
   section.block.in p{opacity:1;transform:none;transition-delay:.56s}
-  footer{position:relative;z-index:10;text-align:center;padding:60px 20px;color:var(--soft);
-    font-size:11px;letter-spacing:.3em;text-transform:uppercase;background:var(--bg0)}
+  footer{position:relative;z-index:10;text-align:center;padding:13vh 24px 8vh;background:var(--bg0)}
+  footer .fmark{font-family:'Cormorant Garamond',serif;font-weight:500;
+    font-size:clamp(34px,6vw,62px);letter-spacing:.42em;padding-left:.42em;margin-bottom:22px;
+    background:linear-gradient(100deg,#7d7970 14%,#e8e2d6 44%,#e6c477 60%,#8a8069 88%);
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;
+    filter:drop-shadow(0 0 18px rgba(233,198,122,.14));}
+  footer .fline{font-size:11px;letter-spacing:.34em;text-transform:uppercase;color:var(--soft);margin-bottom:30px}
+  footer .fcopy{font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:rgba(139,135,127,.5)}
 </style>
 </head>
 <body>
@@ -278,7 +284,11 @@
     <p>Una firma ecuestre integrada — cría, análisis biomecánico, competición, atelier y joyería bajo una sola marca. RASH Group abre su mesa a socios estratégicos que quieran construir la referencia europea del salto de lujo. Conversaciones de inversión, bajo invitación.</p>
   </section>
 
-  <footer id="contacto">RASH Group · Sport Horses — Cría · Análisis · Competición · Atelier · Joyería</footer>
+  <footer id="contacto">
+    <div class="fmark">RASH</div>
+    <div class="fline">Sport Horses · Cría — Análisis — Competición — Atelier — Joyería</div>
+    <div class="fcopy">© 2026 RASH Group · Todos los derechos reservados</div>
+  </footer>
 
 <script>
 (function(){
