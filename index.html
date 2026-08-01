@@ -246,7 +246,7 @@
   footer .fcopy{font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:rgba(139,135,127,.5)}
 
   /* ==== SEMENTALES · UMBRILLIO (cinematografica) ==== */
-  section.stallion{position:relative;z-index:10;background:var(--bg0);
+  section.stallion{position:relative;z-index:10;background:#000;
     min-height:100vh;display:grid;grid-template-columns:1.05fr .95fr;align-items:center;
     gap:2vw;padding:12vh 7vw;overflow:hidden}
   section.stallion::before{content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);
@@ -258,9 +258,10 @@
   section.stallion .crest img{position:absolute;top:50%;left:60%;transform:translate(-50%,-50%);
     height:90%;opacity:.04;filter:drop-shadow(0 0 60px rgba(230,196,119,.14));mix-blend-mode:screen}
   .stallion-photo{position:relative;z-index:1;display:flex;justify-content:center;align-items:center}
+  /* SIN mascara: en Safari (escritorio Y iOS) un <img> con mask-image DESAPARECE al hacer scroll.
+     El JPG ya trae el negro horneado (borde ~0,0,0) y la seccion es negro PURO -> se funde sin caja ni mascara. */
   .stallion-photo img{height:86vh;max-width:100%;object-fit:contain;filter:saturate(1.02) contrast(1.02);
-    -webkit-mask-image:radial-gradient(ellipse 86% 94% at 52% 50%, #000 62%, rgba(0,0,0,.5) 84%, transparent 99%);
-    mask-image:radial-gradient(ellipse 86% 94% at 52% 50%, #000 62%, rgba(0,0,0,.5) 84%, transparent 99%)}
+    transform:translateZ(0);-webkit-backface-visibility:hidden;backface-visibility:hidden}
   .stallion-text{position:relative;z-index:2;max-width:520px;padding-right:2vw}
   .stallion-text .eyebrow{font-size:11px;letter-spacing:.4em;text-transform:uppercase;color:var(--gold);margin-bottom:20px}
   .stallion-text h2{font-family:'Cormorant Garamond',serif;font-weight:500;letter-spacing:.06em;
@@ -289,12 +290,8 @@
   @media(max-width:820px){
     section.stallion{grid-template-columns:1fr;gap:0;padding:14vh 8vw 12vh;text-align:center}
     .stallion-photo{order:1} .stallion-photo img{height:56vh}
-    /* MOVIL: SIN mascara -> en Safari iOS un <img> con mask-image DESAPARECE al hacer scroll.
-       En vez de mascara, la foto se funde porque su negro horneado (0,0,0) == fondo negro PURO de la seccion. */
-    .stallion-photo img{-webkit-mask-image:none;mask-image:none;
-      transform:translateZ(0);-webkit-backface-visibility:hidden;backface-visibility:hidden}
-    section.stallion{background:#000}                       /* negro puro = mismo negro que el borde de la foto -> sin caja */
-    section.stallion .key,section.stallion .crest img{mix-blend-mode:normal}  /* 'screen' repinta mal al hacer scroll en iOS */
+    /* 'screen' repinta mal al hacer scroll en Safari iOS -> normal (imperceptible sobre negro) */
+    section.stallion .key,section.stallion .crest img{mix-blend-mode:normal}
     .stallion-text{order:2;max-width:100%;padding:0;margin:0 auto}
     .stallion-text p{margin-left:auto;margin-right:auto}
     .stallion-text .traits{justify-content:center}
