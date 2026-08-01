@@ -244,6 +244,55 @@
     filter:drop-shadow(0 0 18px rgba(233,198,122,.14));}
   footer .fline{font-size:11px;letter-spacing:.34em;text-transform:uppercase;color:var(--soft);margin-bottom:30px}
   footer .fcopy{font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:rgba(139,135,127,.5)}
+
+  /* ==== SEMENTALES · UMBRILLIO (cinematografica) ==== */
+  section.stallion{position:relative;z-index:10;background:var(--bg0);
+    min-height:100vh;display:grid;grid-template-columns:1.05fr .95fr;align-items:center;
+    gap:2vw;padding:12vh 7vw;overflow:hidden}
+  section.stallion::before{content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);
+    width:min(58%,500px);height:1px;
+    background:linear-gradient(90deg,transparent,rgba(198,158,74,.32),transparent)}
+  section.stallion .key{position:absolute;inset:0;z-index:0;pointer-events:none;mix-blend-mode:screen;
+    background:radial-gradient(42% 52% at 30% 30%, rgba(230,196,119,.10), transparent 64%)}
+  section.stallion .crest{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+  section.stallion .crest img{position:absolute;top:50%;left:60%;transform:translate(-50%,-50%);
+    height:90%;opacity:.04;filter:drop-shadow(0 0 60px rgba(230,196,119,.14));mix-blend-mode:screen}
+  .stallion-photo{position:relative;z-index:1;display:flex;justify-content:center;align-items:center}
+  .stallion-photo img{height:86vh;max-width:100%;object-fit:contain;filter:saturate(1.02) contrast(1.02);
+    -webkit-mask-image:radial-gradient(ellipse 86% 94% at 52% 50%, #000 62%, rgba(0,0,0,.5) 84%, transparent 99%);
+    mask-image:radial-gradient(ellipse 86% 94% at 52% 50%, #000 62%, rgba(0,0,0,.5) 84%, transparent 99%)}
+  .stallion-text{position:relative;z-index:2;max-width:520px;padding-right:2vw}
+  .stallion-text .eyebrow{font-size:11px;letter-spacing:.4em;text-transform:uppercase;color:var(--gold);margin-bottom:20px}
+  .stallion-text h2{font-family:'Cormorant Garamond',serif;font-weight:500;letter-spacing:.06em;
+    font-size:clamp(52px,7vw,104px);line-height:.92;margin-bottom:8px;
+    background:linear-gradient(100deg,#8a8069 10%,#e8e2d6 42%,#e6c477 58%,#a89a7c 76%,#7d7970 92%);
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;
+    filter:drop-shadow(0 2px 26px rgba(198,158,74,.16))}
+  .stallion-text .kicker{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(18px,2vw,24px);
+    color:var(--goldh);margin-bottom:26px;letter-spacing:.02em}
+  .stallion-text p{color:var(--soft);line-height:1.95;font-size:clamp(14px,1.6vw,17px);max-width:460px;margin-bottom:30px}
+  .stallion-text .traits{display:flex;gap:22px;flex-wrap:wrap}
+  .stallion-text .traits span{font-size:10.5px;letter-spacing:.32em;text-transform:uppercase;color:var(--ink);opacity:.86}
+  .stallion-text .traits span::before{content:"·";color:var(--gold);margin-right:22px}
+  .stallion-text .traits span:first-child::before{content:"";margin:0}
+  .stallion-text .eyebrow,.stallion-text h2,.stallion-text .kicker,.stallion-text p,.stallion-text .traits{
+    opacity:0;transform:translateY(32px);will-change:opacity,transform;
+    transition:opacity 1.7s cubic-bezier(.16,.7,.2,1), transform 1.7s cubic-bezier(.16,.7,.2,1)}
+  .stallion-photo{opacity:0;transform:scale(1.06);filter:blur(24px);will-change:opacity,transform,filter;
+    transition:opacity 3.3s cubic-bezier(.16,.7,.2,1), transform 3.3s cubic-bezier(.16,.7,.2,1), filter 3.3s cubic-bezier(.16,.7,.2,1)}
+  .stallion.in .stallion-photo{opacity:1;transform:none;filter:none;transition-delay:.1s}
+  .stallion.in .stallion-text .eyebrow{opacity:1;transform:none;transition-delay:.35s}
+  .stallion.in .stallion-text h2{opacity:1;transform:none;transition-delay:.55s}
+  .stallion.in .stallion-text .kicker{opacity:1;transform:none;transition-delay:.72s}
+  .stallion.in .stallion-text p{opacity:1;transform:none;transition-delay:.86s}
+  .stallion.in .stallion-text .traits{opacity:1;transform:none;transition-delay:1.0s}
+  @media(max-width:820px){
+    section.stallion{grid-template-columns:1fr;gap:0;padding:14vh 8vw 12vh;text-align:center}
+    .stallion-photo{order:1} .stallion-photo img{height:56vh}
+    .stallion-text{order:2;max-width:100%;padding:0;margin:0 auto}
+    .stallion-text p{margin-left:auto;margin-right:auto}
+    .stallion-text .traits{justify-content:center}
+  }
 </style>
 </head>
 <body>
@@ -282,39 +331,54 @@
   <section class="hero-space" style="height:100vh;background:transparent;position:relative;z-index:8"></section>
 
   <section class="block" id="cria">
-    <div class="eyebrow">01 · Cría</div>
-    <h2>Cría de sport horses</h2>
-    <p>Sangre de salto seleccionada entre España, Países Bajos y Turquía. Genética, doma y seguimiento de una misma firma — caballos criados para volar, no solo para vender.</p>
+    <div class="eyebrow">01 · Cría — Países Bajos</div>
+    <h2>Nacidos para saltar</h2>
+    <p>Nuestros caballos nacen y se crían en los Países Bajos, cuna del caballo de salto europeo. Cría y primera doma bajo una misma firma: cada ejemplar se forma desde potro con un solo objetivo — volar.</p>
   </section>
 
   <section class="block" id="analisis">
     <div class="eyebrow">02 · Análisis</div>
     <h2>El salto, medido de verdad</h2>
-    <p>Programa de análisis biomecánico fotograma a fotograma: aproximación, batida, báscula y recepción. La capa de confianza para subastas — números honestos que aguantan la lupa de un comprador.</p>
+    <p>Análisis biomecánico fotograma a fotograma: aproximación, batida, báscula y recepción. Números honestos sobre cada salto — la confianza que un comprador necesita antes de decidir.</p>
   </section>
 
   <section class="block" id="competicion">
-    <div class="eyebrow">03 · Competición</div>
-    <h2>Caballos que saltan alto</h2>
-    <p>Ejemplares de salto de alto nivel, preparados para pista. Cada caballo llega con su pasaporte de salto en vídeo: lo que la cámara ve, lo medimos; lo que no, lo decimos.</p>
+    <div class="eyebrow">03 · Competición — Irlanda</div>
+    <h2>Formados para saltar a lo grande</h2>
+    <p>De Holanda a Irlanda: allí el caballo sube de nivel en uno de los mejores entornos del mundo para el salto, hasta estar listo para pista de alto nivel.</p>
+  </section>
+
+  <section class="stallion" id="sementales">
+    <div class="key"></div>
+    <div class="crest"><img src="_hero_head_web.png?v=1" alt=""></div>
+    <div class="stallion-photo">
+      <img src="umbrillio_hero.jpg?v=13" alt="Umbrillio — semental de salto RASH Sport Horses">
+    </div>
+    <div class="stallion-text">
+      <div class="eyebrow">04 · Sementales — Países Bajos</div>
+      <h2>Umbrillio</h2>
+      <div class="kicker">Poder hecho caballo</div>
+      <p>Semental de salto criado bajo la firma RASH. Potencia en la batida, firmeza en el plantado y un temperamento noble para volar. Cada línea de su cuerpo dice para qué nació.</p>
+      <div class="traits"><span>Poder</span><span>Firmeza</span><span>Salto</span></div>
+    </div>
   </section>
 
   <section class="block" id="atelier">
-    <div class="eyebrow">04 · Atelier</div>
+    <div class="eyebrow">05 · Atelier</div>
     <h2>Vestir la disciplina</h2>
     <p>Ropa ecuestre diseñada y firmada bajo la marca RASH. Línea propia para la amazona y el jinete — la misma exigencia del salto, llevada a la tela.</p>
   </section>
 
   <section class="block" id="joyeria">
-    <div class="eyebrow">05 · Joyería &amp; Plata</div>
+    <div class="eyebrow">06 · Joyería &amp; Plata</div>
     <h2>El logo, hecho joya</h2>
     <p>Accesorios ecuestres de lujo en plata 925, oro 18k y cuero noble. La cabeza RASH facetada como lenguaje de metal nativo — para la amazona y para el caballo.</p>
   </section>
 
   <section class="block" id="investors">
-    <div class="eyebrow">06 · Investment</div>
+    <div class="eyebrow">07 · Investment</div>
     <h2>RASH Group</h2>
-    <p>Una firma ecuestre integrada — cría, análisis biomecánico, competición, atelier y joyería bajo una sola marca. RASH Group abre su mesa a socios estratégicos que quieran construir la referencia europea del salto de lujo. Conversaciones de inversión, bajo invitación.</p>
+    <p>Una firma ecuestre integrada: cría en los Países Bajos, formación en Irlanda y dirección desde España — más atelier y joyería bajo una sola marca. Trabajo a medida para quien busca un caballo de salto de verdad. RASH Group abre su mesa a socios estratégicos para construir la referencia europea del salto de lujo. Conversaciones de inversión, bajo invitación.</p>
   </section>
 
   <footer id="contacto">
@@ -392,7 +456,7 @@
   });
 
   // entrada escalonada de los apartados al entrar en pantalla (una sola vez)
-  var blocks=document.querySelectorAll('section.block');
+  var blocks=document.querySelectorAll('section.block, section.stallion');
   if('IntersectionObserver' in window){
     var io=new IntersectionObserver(function(entries){
       entries.forEach(function(en){
