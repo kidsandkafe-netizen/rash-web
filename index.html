@@ -288,7 +288,8 @@
   .stallion.in .stallion-text .traits{opacity:1;transform:none;transition-delay:1.0s}
   @media(max-width:820px){
     section.stallion{grid-template-columns:1fr;gap:0;padding:14vh 8vw 12vh;text-align:center}
-    .stallion-photo{order:1} .stallion-photo img{height:56vh}
+    .stallion-photo{order:1} .stallion-photo img{height:56vh;
+      -webkit-mask-image:none;mask-image:none}   /* movil: el negro ya viene horneado -> sin mascara (evita bug Safari movil) */
     .stallion-text{order:2;max-width:100%;padding:0;margin:0 auto}
     .stallion-text p{margin-left:auto;margin-right:auto}
     .stallion-text .traits{justify-content:center}
