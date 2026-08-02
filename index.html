@@ -252,16 +252,28 @@
   section.stallion::before{content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);
     width:min(58%,500px);height:1px;
     background:linear-gradient(90deg,transparent,rgba(198,158,74,.32),transparent)}
-  section.stallion .key{position:absolute;inset:0;z-index:0;pointer-events:none;mix-blend-mode:screen;
-    background:radial-gradient(42% 52% at 30% 30%, rgba(230,196,119,.10), transparent 64%)}
+  /* SPOT cinematografico ceñido a cabeza/cuello/pecho (normal blend = identico a 'screen' sobre negro puro, y Safari no lo rompe) */
+  section.stallion .key{position:absolute;inset:0;z-index:0;pointer-events:none;mix-blend-mode:normal;
+    background:radial-gradient(30% 44% at 27% 45%, rgba(232,210,168,.18), rgba(196,158,74,.05) 46%, transparent 66%)}
+  /* charco de luz en el suelo, donde pisa */
+  section.stallion .pool{position:absolute;left:27%;top:84%;transform:translate(-50%,-50%);
+    width:26vw;height:9vh;border-radius:50%;z-index:0;pointer-events:none;mix-blend-mode:normal;
+    background:radial-gradient(ellipse, rgba(214,192,150,.08), transparent 66%)}
   section.stallion .crest{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
   section.stallion .crest img{position:absolute;top:50%;left:60%;transform:translate(-50%,-50%);
-    height:90%;opacity:.04;filter:drop-shadow(0 0 60px rgba(230,196,119,.14));mix-blend-mode:screen}
+    height:90%;opacity:.04;filter:drop-shadow(0 0 60px rgba(230,196,119,.14));mix-blend-mode:normal}
   .stallion-photo{position:relative;z-index:1;display:flex;justify-content:center;align-items:center}
   /* SIN mascara: en Safari (escritorio Y iOS) un <img> con mask-image DESAPARECE al hacer scroll.
      El JPG ya trae el negro horneado (borde ~0,0,0) y la seccion es negro PURO -> se funde sin caja ni mascara. */
-  .stallion-photo img{height:86vh;max-width:100%;object-fit:contain;filter:saturate(1.02) contrast(1.02);
-    transform:translateZ(0);-webkit-backface-visibility:hidden;backface-visibility:hidden}
+  .stallion-photo img{height:86vh;max-width:100%;object-fit:contain;filter:saturate(1.05) contrast(1.12)}
+  /* SOMBRA que traga grupa y patas -> el caballo nace de la sombra (div sobre la foto, sin filtro/mascara -> Safari-safe) */
+  .stallion-photo .sink{position:absolute;inset:0;z-index:2;pointer-events:none;mix-blend-mode:normal;
+    background:
+      linear-gradient(102deg, transparent 40%, rgba(0,0,0,.30) 66%, rgba(0,0,0,.66) 86%, rgba(0,0,0,.9) 100%),
+      linear-gradient(180deg, transparent 54%, rgba(0,0,0,.5) 82%, rgba(0,0,0,.92) 100%)}
+  /* VIÑETA de cine: esquinas de la seccion caen a negro. z-index:1 (bajo el texto z:2) para no atenuar la tipografia */
+  section.stallion::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
+    background:radial-gradient(120% 100% at 40% 46%, transparent 54%, rgba(0,0,0,.5) 84%, #000 100%)}
   .stallion-text{position:relative;z-index:2;max-width:520px;padding-right:2vw}
   .stallion-text .eyebrow{font-size:11px;letter-spacing:.4em;text-transform:uppercase;color:var(--gold);margin-bottom:20px}
   .stallion-text h2{font-family:'Cormorant Garamond',serif;font-weight:500;letter-spacing:.06em;
@@ -279,9 +291,10 @@
   .stallion-text .eyebrow,.stallion-text h2,.stallion-text .kicker,.stallion-text p,.stallion-text .traits{
     opacity:0;transform:translateY(32px);will-change:opacity,transform;
     transition:opacity 1.7s cubic-bezier(.16,.7,.2,1), transform 1.7s cubic-bezier(.16,.7,.2,1)}
-  .stallion-photo{opacity:0;transform:scale(1.06);filter:blur(24px);will-change:opacity,transform,filter;
-    transition:opacity 3.3s cubic-bezier(.16,.7,.2,1), transform 3.3s cubic-bezier(.16,.7,.2,1), filter 3.3s cubic-bezier(.16,.7,.2,1)}
-  .stallion.in .stallion-photo{opacity:1;transform:none;filter:none;transition-delay:.1s}
+  /* reveal de la foto SOLO con opacidad (sin blur/will-change -> Safari suelta la capa de filtro al hacer scroll y la foto DESAPARECE) */
+  .stallion-photo{opacity:0;transform:scale(1.03);
+    transition:opacity 2.4s cubic-bezier(.16,.7,.2,1), transform 2.4s cubic-bezier(.16,.7,.2,1)}
+  .stallion.in .stallion-photo{opacity:1;transform:none;transition-delay:.1s}
   .stallion.in .stallion-text .eyebrow{opacity:1;transform:none;transition-delay:.35s}
   .stallion.in .stallion-text h2{opacity:1;transform:none;transition-delay:.55s}
   .stallion.in .stallion-text .kicker{opacity:1;transform:none;transition-delay:.72s}
@@ -353,15 +366,16 @@
 
   <section class="stallion" id="sementales">
     <div class="key"></div>
-    <div class="crest"><img src="_hero_head_web.png?v=1" alt=""></div>
+    <div class="pool"></div>
+    <div class="crest"><img src="_hero_head_web.png" alt=""></div>
     <div class="stallion-photo">
-      <img src="umbrillio_hero.jpg?v=13" alt="Umbrillio — semental de salto RASH Sport Horses">
+      <img src="umbrillio_hero.jpg" alt="Umbrillio — caballo de competición de salto RASH Sport Horses (Irlanda)">
+      <div class="sink"></div>
     </div>
     <div class="stallion-text">
-      <div class="eyebrow">04 · Sementales — Países Bajos</div>
+      <div class="eyebrow">04 · Competición — Irlanda</div>
       <h2>Umbrillio</h2>
       <div class="kicker">Poder hecho caballo</div>
-      <p>Semental de salto criado bajo la firma RASH. Potencia en la batida, firmeza en el plantado y un temperamento noble para volar. Cada línea de su cuerpo dice para qué nació.</p>
       <div class="traits"><span>Poder</span><span>Firmeza</span><span>Salto</span></div>
     </div>
   </section>
@@ -398,6 +412,10 @@
   var title=document.querySelector('.heroTitle');
   var shaft=document.querySelector('.shaft');
   var loader=document.getElementById('loader');
+  var stSec=document.getElementById('sementales');
+  var stPhoto=stSec?stSec.querySelector('.stallion-photo'):null;
+  var stKey=stSec?stSec.querySelector('.key'):null;
+  var stPool=stSec?stSec.querySelector('.pool'):null;
   var mx=0,my=0, tmx=0,tmy=0, t0=null, INTRO=2600, sp=0;
 
   function ease(x){return 1-Math.pow(1-x,3);}   // easeOutCubic
@@ -449,6 +467,23 @@
     if(shaft){
       if(sp>0){ shaft.style.transition='none'; shaft.style.opacity=(1-sp).toFixed(3); }
       else { shaft.style.transition=''; shaft.style.opacity=''; }
+    }
+    // UMBRILLIO: ENTRADA DESDE EL FONDO atada al scroll — crece de la profundidad (como el logo "de lejos"),
+    // nace de la nada con bloom tardio y la LUZ se enciende con el. Recorrido largo -> se nota mucho.
+    if(stPhoto && stSec){
+      var r=stSec.getBoundingClientRect(), vh=innerHeight||1;
+      var center=r.top + r.height/2;
+      var prog=(vh*1.22 - center)/(vh*0.86);       // 0 = aun al fondo · 1 = ya en escena (recorrido largo)
+      prog=prog<0?0:(prog>1?1:prog);
+      var es=prog*prog*(3-2*prog);                 // smoothstep
+      var eb=Math.pow(es,1.6);                      // opacidad: invisible al principio, BLOOM tardio y potente
+      stPhoto.style.transition='none';
+      stPhoto.style.opacity=eb.toFixed(3);
+      // crece desde la profundidad (0.82->1.0) + sube desde abajo (rise) = entra del fondo
+      stPhoto.style.transform='scale('+(0.82+0.18*es).toFixed(4)+') translateY('+((1-es)*90).toFixed(1)+'px)';
+      // la luz de foco se ENCIENDE a medida que llega
+      if(stKey) stKey.style.opacity=(0.06+0.94*es).toFixed(3);
+      if(stPool) stPool.style.opacity=(0.06+0.94*es).toFixed(3);
     }
     requestAnimationFrame(frame);
   }
