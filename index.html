@@ -277,11 +277,11 @@
   .stallion-photo .par,.stallion-photo .dolly,.stallion-photo .photo-inner{
     position:relative;display:flex;justify-content:center;align-items:center;width:100%}
   /* PUSH-IN de camara: al entrar en escena, la camara se acerca lento y asienta el plano (una vez) */
-  .stallion.in .stallion-photo .dolly{animation:stDolly 3.2s cubic-bezier(.16,.7,.2,1) both}
-  @keyframes stDolly{0%{transform:scale(1.055)}100%{transform:scale(1.0)}}
+  .stallion.in .stallion-photo .dolly{animation:stDolly 4.4s cubic-bezier(.16,.7,.2,1) both}
+  @keyframes stDolly{0%{transform:scale(1.03)}100%{transform:scale(1.0)}}
   /* RESPIRACION de camara: escala lentisima en bucle (plano sostenido a mano) */
-  .stallion-photo .photo-inner{animation:stBreathe 12s ease-in-out infinite}
-  @keyframes stBreathe{0%,100%{transform:scale(1.0)}50%{transform:scale(1.03)}}
+  .stallion-photo .photo-inner{animation:stBreathe 20s ease-in-out infinite}
+  @keyframes stBreathe{0%,100%{transform:scale(1.0)}50%{transform:scale(1.025)}}
   /* ETALONAJE / GRADO DE COLOR: luces calidas (ambar) + sombras frias (azul-verde). Normal blend -> Safari-safe */
   .stallion-photo .grade{position:absolute;inset:0;z-index:2;pointer-events:none;mix-blend-mode:normal;
     background:
