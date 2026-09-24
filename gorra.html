@@ -408,13 +408,17 @@
     opacity:0;transition:opacity 1.4s ease}
   .gstage.frente::before{opacity:1}
 
-  /* `aspect-ratio` con la proporción EXACTA de los cuadros (1640x662) en lugar de una altura
-     fija: con `height:min(58vh,480px)` el `contain` dibujaba la foto a 804x324 y dejaba 78 px
-     de negro muerto arriba y otros 78 abajo DENTRO del marco. Quitar ese hueco no encoge la
-     gorra ni un píxel -- se dibujaba igual de grande -- pero borra 156 px de vacío y aprieta
-     la composición. `contain` se queda de red por si algún día cambia el recorte. */
-  #gspin{display:block;width:100%;aspect-ratio:1640/662;height:auto;object-fit:contain;
-    position:relative;z-index:1;opacity:0;transition:opacity .9s ease;
+  /* La PELÍCULA: las dos capas del fundido, tratadas como una sola imagen.
+     `isolation:isolate` es la pieza que hace que esto funcione y no es cosmética. Sin ella, las
+     dos fotos se mezclarían con `screen` CADA UNA contra el fondo, y donde las dos tienen gorra
+     el resultado sería 1-(1-a)(1-b): más claro que cualquiera de las dos. La gorra se
+     ENCENDERÍA a mitad de cada paso, 72 destellos por vuelta. Aislando, las dos se funden entre
+     sí con normalidad dentro de la caja y el resultado YA FUNDIDO es lo único que se mezcla con
+     la página -- una sola vez, como antes con una sola foto.
+     La entrada (opacity 0 -> 1) también sube aquí: si se quedara en `#gspin`, esa transición de
+     .9 s se pelearía con la opacidad que el guion escribe en la otra capa cuadro a cuadro. */
+  .gfilm{position:relative;z-index:1;isolation:isolate;
+    opacity:0;transition:opacity .9s ease;
     /* Quitar el borde no bastaba: el rectángulo seguía viéndose, sólo que al revés. Los cuadros
        están recortados contra NEGRO PURO (#000, medido: el fondo lejano del archivo da L=0,002)
        y la página es `--bg0` #020203 más las capas fijas del hero, que ahí suman unos cuantos
@@ -425,9 +429,21 @@
        vuelve transparente solo, sin máscara ni recorte nuevo -- y donde la foto es 1 (el hilo
        plata) el resultado sigue siendo 1. La plata no se toca, que es la regla de la marca. */
     mix-blend-mode:screen}
+
+  /* Las dos capas ocupan exactamente el mismo hueco. La primera es la que MIDE (va en flujo y
+     le da alto a la caja con su proporción); la segunda se apoya encima sin ocupar sitio.
+     `aspect-ratio` con la proporción EXACTA de los cuadros en lugar de una altura fija: con
+     `height:min(58vh,480px)` el `contain` dibujaba la foto a 804x324 y dejaba 78 px de negro
+     muerto arriba y otros 78 abajo DENTRO del marco. */
+  #gspin,#gspin2{display:block;width:100%;aspect-ratio:1640/662;height:auto;object-fit:contain}
+  /* Sin transición NINGUNA: esta opacidad la escribe el guion sesenta veces por segundo con el
+     decimal del giro. Una transición aquí le añadiría un retardo a cada escritura y la gorra
+     iría por detrás del dedo -- que es exactamente lo que se viene a arreglar. */
+  #gspin2{position:absolute;inset:0;opacity:0;transition:none}
+
   /* `frente` = ya está la foto de frente -> se ENSEÑA. `lista` = están las 72 -> se puede GIRAR.
      Antes las dos cosas eran la misma clase y la gorra no aparecía hasta el último byte. */
-  .gstage.frente #gspin{opacity:1}
+  .gstage.frente .gfilm{opacity:1}
   /* Hasta que no se puede girar, el cursor no promete que se pueda. */
   .gstage:not(.lista){cursor:default}
 
@@ -521,7 +537,7 @@
     .gdial{margin-top:10px}
   }
   @media (prefers-reduced-motion:reduce){
-    #gspin,section.gorra .gtxt>*,section.gorra .gvis{transition:none}
+    .gfilm,section.gorra .gtxt>*,section.gorra .gvis{transition:none}
   }
 </style>
   <!-- La foto de frente, y a propósito la PEQUEÑA y en JPEG: es la que enseña la gorra en los
@@ -583,9 +599,22 @@
     <div class="gvis">
       <div class="gstage" id="gstage" tabindex="0" role="img"
            aria-label="Gorra negra de seis paneles con la cabeza RASH bordada en hilo plata. Arrastra en horizontal para girarla.">
-        <!-- La 17 es la vista de frente; el guion la deja fija en la constante FRENTE. -->
-        <img id="gspin" src="spin360s/17.jpg" draggable="false" alt=""
-             decoding="async" fetchpriority="high">
+        <!-- DOS fotos, no una, y una encima de la otra. Con una sola, el visor sólo podía
+             enseñar cuadros enteros: la gorra se quedaba clavada 18 px de dedo y entonces
+             saltaba los 5 grados de golpe. Son 72 saltos por vuelta, y eso no se lee como un
+             giro sino como un pase de diapositivas.
+             Con dos capas se puede enseñar lo que hay ENTRE dos cuadros: la de abajo lleva el
+             cuadro anterior, la de arriba el siguiente, y la parte decimal del giro es
+             directamente la opacidad de la de arriba. El movimiento pasa a ser continuo.
+             La 17 es la vista de frente; el guion la deja fija en la constante FRENTE. -->
+        <div class="gfilm" id="gfilm">
+          <img id="gspin" src="spin360s/17.jpg" draggable="false" alt=""
+               decoding="async" fetchpriority="high">
+          <!-- Decorativa: la lee el guion, nunca un lector de pantalla. La descripción del
+               producto vive en el `aria-label` del escenario, y repetirla aquí la diría dos
+               veces. -->
+          <img id="gspin2" draggable="false" alt="" aria-hidden="true" decoding="async">
+        </div>
         <div class="ghint">Arrastra para girar</div>
         <div class="gcarga" id="gcarga"></div>
       </div>
@@ -781,9 +810,10 @@
 
   var stage = document.getElementById('gstage'),
       img   = document.getElementById('gspin'),
+      img2  = document.getElementById('gspin2'),
       barra = document.getElementById('gcarga'),
       dial  = document.getElementById('gdial');
-  if (!stage || !img) return;
+  if (!stage || !img || !img2) return;
 
   /* --- qué juego de fotos pedir --------------------------------------------------------------
      Hay dos entregas y dos formatos, y la elección se hace aquí una sola vez.
@@ -811,11 +841,19 @@
       if (fmtListo) return;                   // el que llegue primero manda; el otro no hace nada
       if (webp) EXT = '.webp';
       fmtListo = true;
-      visible = -1; pinta();                  // repinta el frente ya con el formato definitivo
+      /* Las DOS capas a -1: si sólo se invalidara una, la de arriba se quedaría con el cuadro
+         en el formato viejo y la mezcla iría descompensada hasta el siguiente cambio. */
+      visible = visible2 = -1; pinta();       // repinta el frente ya con el formato definitivo
       if (enEspera){ var f = enEspera; enEspera = null; f(); }
     }
+    /* ⚠️ 2026-09-25: LA ENTREGA VA SÓLO EN JPEG. El subidor web de GitHub no admite más de 100
+       archivos por vez, y tener los dos formatos dejaba las carpetas en 144 -- imposibles de
+       arrastrar de una pieza. Los .webp están guardados en `_cap3d/_webp_guardados/`; para
+       volver a encenderlos basta con devolverlos a su carpeta y quitar este `true`. Mientras
+       no estén SUBIDOS, preguntar por ellos sólo sirve para pedir 72 archivos que no existen. */
+    var SOLO_JPEG = true;
     var t = new Image();
-    t.onload = t.onerror = function(){ resuelve(t.width === 1); };
+    t.onload = t.onerror = function(){ resuelve(!SOLO_JPEG && t.width === 1); };
     t.src = 'data:image/webp;base64,UklGRiQAAABXRUJQVlA4IBgAAAAwAQCdASoBAAEADMDOJaQAA3AA/uxnAAA=';
     /* Red de la red. Un data URI de 44 bytes contesta siempre -- pero la descarga entera cuelga
        de esta respuesta, y dejar el visor muerto para siempre por una promesa que no se cumple
@@ -879,13 +917,35 @@
   function asoma(){ stage.classList.add('frente'); }
   if (img.complete && img.naturalWidth) asoma(); else img.addEventListener('load', asoma);
 
-  var pos = FRENTE, visible = -1;
+  /* --- pintar ENTRE cuadros ------------------------------------------------------------------
+     `pos` nunca fue un número entero: es la posición real del dedo traducida a cuadros, con sus
+     decimales. Lo que pasaba antes es que se tiraban -- `Math.round(pos)` -- y sólo se enseñaba
+     el cuadro más cercano. Con 72 fotos eso son 5 grados por paso y 18 px de dedo en escritorio
+     (7 en el móvil): la gorra se quedaba quieta y pegaba un tirón, 72 veces por vuelta.
+
+     Ahora el decimal MANDA. Se enseñan los DOS cuadros que rodean a `pos` -- el de abajo con el
+     anterior, el de arriba con el siguiente -- y el decimal es la opacidad del de arriba: a mitad
+     de camino entre el 17 y el 18 se ve medio 17 y medio 18. El giro pasa a ser continuo aunque
+     las fotos sigan siendo 72.
+
+     Y de propina arregla algo que NO se podía arreglar con las fotos: la gorra no está clavada
+     entre cuadro y cuadro. Medido sobre los 72, su centro se mueve 11 px de media de un cuadro
+     al siguiente, con un tirón de 65 px entre el 41 y el 42 (la mano que la giró no era un
+     torno). Enseñar los dos a la vez reparte ese salto por todo el tramo en vez de soltarlo de
+     golpe en un fotograma. */
+  var pos = FRENTE, visible = -1, visible2 = -1;
+  function vuelve(i){ return ((i % N) + N) % N; }   // 72 -> 0, -1 -> 71: la vuelta no tiene canto
   function pinta(){
-    var i = ((Math.round(pos) % N) + N) % N;
-    if (i === visible) return;
-    visible = i;
-    img.src = src(i);
-    if (dial) dial.style.left = (i / N * 100) + '%';
+    var ent = Math.floor(pos), dec = pos - ent;
+    var a = vuelve(ent), b = vuelve(ent + 1);
+    /* El `src` sólo se toca cuando CAMBIA de cuadro. Reasignar el mismo src en cada movimiento
+       del dedo hace que el navegador vuelva a resolver la imagen decenas de veces por segundo,
+       y eso sí se nota. Lo que cambia sesenta veces por segundo es sólo la opacidad. */
+    if (a !== visible){ visible = a; img.src = src(a); }
+    if (b !== visible2){ visible2 = b; img2.src = src(b); }
+    img2.style.opacity = dec;
+    /* La aguja también deja de ir a saltos: se mueve con el decimal, como la gorra. */
+    if (dial) dial.style.left = (vuelve(ent) + dec) / N * 100 + '%';
   }
   pinta();
   eligeJuego();                 // después de `pinta`, que la usa para repintar con el formato bueno
@@ -921,13 +981,37 @@
     pinta();
   });
 
+  /* --- ENCAJAR al parar ----------------------------------------------------------------------
+     El fundido es la verdad MIENTRAS se gira: dos cuadros a la vez leen como el rastro del
+     movimiento, igual que una foto de algo que pasa deprisa. Pero parada es una mentira. Si el
+     dedo se levanta justo a mitad de paso, la gorra se queda enseñando medio cuadro 13 y medio
+     14 -- y como la gorra no está clavada entre cuadro y cuadro (su centro se mueve una media de
+     11 px), eso se ve como un BORDADO DOBLE, dos cabezas de caballo solapadas. En un producto de
+     lujo eso no es un efecto, es un defecto.
+     Así que al pararse se desliza al cuadro entero más cercano. Es un viaje de medio cuadro como
+     mucho -- 9 px de gorra, dos décimas de segundo -- así que no se lee como un tirón sino como
+     que la pieza se ASIENTA. Y lo que queda quieto es siempre una foto sola y nítida. */
+  function encaja(){
+    var destino = Math.round(pos), salida = pos, d = destino - salida;
+    if (Math.abs(d) < 0.003){ pos = destino; pinta(); return; }
+    var t0 = performance.now(), DUR = 190;
+    anim = requestAnimationFrame(function paso(t){
+      var k = (t - t0) / DUR; if (k > 1) k = 1;
+      /* Ease-out cúbica: sale con la velocidad que traía y llega frenando. Una interpolación
+         recta aquí se nota como un empujón al final. */
+      pos = salida + d * (1 - Math.pow(1 - k, 3));
+      pinta();
+      if (k < 1) anim = requestAnimationFrame(paso);
+    });
+  }
+
   function suelta(){
     if (!arrastrando) return;
     arrastrando = false;
     stage.classList.remove('girando');
     /* Por debajo de este umbral fue una colocación, no un lanzamiento: se queda donde la han
        dejado. Si no, cada ajuste fino acabaría con la gorra deslizándose sola. */
-    if (Math.abs(vel) < 0.006){ vel = 0; return; }
+    if (Math.abs(vel) < 0.006){ vel = 0; encaja(); return; }
     var ult = performance.now();
     anim = requestAnimationFrame(function tic(t){
       var dt = Math.min(t - ult, 40); ult = t;   // tope por si la pestaña estuvo dormida
@@ -944,7 +1028,10 @@
          en seco en cuanto la vuelven a tocar (ver el `pointerdown`). */
       vel *= Math.pow(0.9975, dt);
       pinta();
-      if (Math.abs(vel) > 0.0008) anim = requestAnimationFrame(tic);
+      /* Cuando la inercia se apaga NO se abandona a media mezcla: se encaja igual que cuando la
+         sueltan sin impulso. El final de una vuelta lanzada es justo el momento en que el
+         visitante se queda mirando. */
+      if (Math.abs(vel) > 0.0008) anim = requestAnimationFrame(tic); else encaja();
     });
   }
   ['pointerup','pointercancel','lostpointercapture'].forEach(function(ev){
