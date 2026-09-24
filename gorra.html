@@ -435,7 +435,11 @@
      `aspect-ratio` con la proporción EXACTA de los cuadros en lugar de una altura fija: con
      `height:min(58vh,480px)` el `contain` dibujaba la foto a 804x324 y dejaba 78 px de negro
      muerto arriba y otros 78 abajo DENTRO del marco. */
-  #gspin,#gspin2{display:block;width:100%;aspect-ratio:1640/662;height:auto;object-fit:contain}
+  /* `will-change:transform` porque el guion reescribe el `translateX` de las dos capas en cada
+     movimiento del dedo para alinearlas antes del fundido: avisando, el navegador las deja en su
+     propia capa de GPU y el corrimiento no cuesta un repintado. */
+  #gspin,#gspin2{display:block;width:100%;aspect-ratio:1640/662;height:auto;object-fit:contain;
+    will-change:transform}
   /* Sin transición NINGUNA: esta opacidad la escribe el guion sesenta veces por segundo con el
      decimal del giro. Una transición aquí le añadiría un retardo a cada escritura y la gorra
      iría por detrás del dedo -- que es exactamente lo que se viene a arreglar. */
@@ -933,6 +937,44 @@
      al siguiente, con un tirón de 65 px entre el 41 y el 42 (la mano que la giró no era un
      torno). Enseñar los dos a la vez reparte ese salto por todo el tramo en vez de soltarlo de
      golpe en un fotograma. */
+
+  /* --- por qué el fundido NO puede ser a pelo: el BORDADO DOBLE -------------------------------
+     Mezclar los dos cuadros tal cual tenía un defecto que se veía a la primera, y en lo peor: el
+     logo. Entre dos fotos vecinas la gorra no se mueve un poco, se mueve MUCHO -- medido por
+     correlación sobre la copa, 17,5 px de media y hasta 36 px por delante, sobre 1640. A mitad de
+     fundido eso son dos cabezas de caballo plateadas separadas 30 px: CUATRO orejas. En una marca
+     cuyo logo es la cabeza de caballo eso no es un efecto de movimiento, es una errata.
+
+     La cura es alinear ANTES de mezclar. `DESPL[k]` es cuánto se corre la imagen del cuadro k al
+     k+1, medido par a par y guardado en % del ancho (no en píxeles) para que valga igual en
+     `spin360` que en `spin360s` que en cualquier tamaño de pantalla. Con el decimal `d`:
+
+         capa de abajo (cuadro k)   -> se adelanta    d · DESPL
+         capa de arriba (cuadro k+1)-> se retrasa (d-1) · DESPL
+
+     y las dos dejan el logo EN EL MISMO SITIO -- el punto intermedio exacto. Lo que queda es un
+     fundido de verdad, una sola cabeza, apenas más blanda que una foto sola. Es interpolación de
+     movimiento del pobre: no sabe de la forma 3D, sólo de que lo que domina entre dos fotos
+     vecinas es una traslación horizontal -- cosa que está MEDIDA, no supuesta (alinear baja el
+     error entre cuadros de 22,5 a 15,3).
+
+     Los números salen de `_cap3d/_tabla_despl.py`, que se puede volver a correr si algún día se
+     rehacen las fotos. Casi todos son negativos porque la secuencia gira siempre para el mismo
+     lado; el +0,488 del 28 es el único positivo y es donde la gorra está de perfil y hay poca
+     textura a la que agarrarse -- vale medio punto porcentual, no se nota, y se deja MEDIDO en
+     vez de maquillado. */
+  var DESPL = [
+     -0.549,  -0.549,  -0.305,  -0.610,  -0.915,  -1.951,  -0.915,  -1.098,
+     -1.585,  -1.768,  -1.768,  -1.707,  -1.768,  -1.890,  -1.829,  -2.012,
+     -1.768,  -1.707,  -1.951,  -2.195,  -2.195,  -1.829,  -1.707,  -1.646,
+     -1.585,  -1.220,  -1.159,  -0.793,   0.488,  -0.366,  -0.732,  -0.488,
+     -0.305,  -0.549,  -0.854,  -0.610,  -0.854,  -1.280,  -1.524,  -0.915,
+     -0.732,  -0.427,  -0.610,  -0.793,  -0.915,  -1.098,  -1.707,  -1.646,
+     -1.402,  -1.280,  -1.098,  -0.854,  -0.976,  -0.488,  -0.183,  -0.610,
+     -0.915,  -0.854,  -0.732,  -0.610,  -0.732,  -0.854,  -0.610,  -0.610,
+     -0.915,  -0.854,  -0.854,  -1.159,  -1.159,  -0.610,  -0.549,  -0.183
+  ];
+
   var pos = FRENTE, visible = -1, visible2 = -1;
   function vuelve(i){ return ((i % N) + N) % N; }   // 72 -> 0, -1 -> 71: la vuelta no tiene canto
   function pinta(){
@@ -944,6 +986,12 @@
     if (a !== visible){ visible = a; img.src = src(a); }
     if (b !== visible2){ visible2 = b; img2.src = src(b); }
     img2.style.opacity = dec;
+    /* Alinear las dos capas antes de que se mezclen (ver arriba). Con `dec` a 0 -- que es como se
+       queda siempre parada, porque `encaja()` la lleva al cuadro entero -- las dos vuelven a 0 y
+       lo que se ve es la foto en su sitio, sin correr ni un píxel. */
+    var dx = DESPL[a];
+    img.style.transform  = 'translateX(' + (dec * dx).toFixed(3) + '%)';
+    img2.style.transform = 'translateX(' + ((dec - 1) * dx).toFixed(3) + '%)';
     /* La aguja también deja de ir a saltos: se mueve con el decimal, como la gorra. */
     if (dial) dial.style.left = (vuelve(ent) + dec) / N * 100 + '%';
   }
