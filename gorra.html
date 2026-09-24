@@ -190,6 +190,20 @@
     justify-content:flex-end;align-items:center;padding:24px 42px;
     opacity:0;transform:translateY(-8px);transition:opacity 1.4s ease 2.6s,transform 1.4s ease 2.6s}
   body.go nav{opacity:1;transform:none}
+  /* El menú es `position:fixed`, así que en cuanto se baja del hero pasa por ENCIMA de la ficha
+     del producto: a 1710 px, "LA GORRA" se cruzaba con la línea "Visera plana con" y no se leía
+     ni una cosa ni la otra. Un velo degradado por detrás lo despega de lo que pasa por debajo
+     SIN dibujar ninguna barra -- una barra sólida aquí convierte el escaparate en una web al
+     uso. Sólo aparece cuando ya se ha bajado, para no ensuciar la entrada, y lo dispara la
+     misma clase `bajado` que apaga el aviso de scroll. */
+  nav::before{content:'';position:absolute;left:0;right:0;top:0;height:150px;z-index:-1;
+    pointer-events:none;opacity:0;transition:opacity .6s ease;
+    /* Opaco de verdad en la franja donde vive el menú (los primeros 58 px: 24 de aire + la
+       línea de texto) y sólo a partir de ahí se deshace. Un degradado suave desde el píxel 0
+       dejaba el texto de debajo a media luz CRUZADO con los enlaces, que se lee peor que
+       cualquiera de las dos cosas por separado. Sobre negro, una franja negra no se ve. */
+    background:linear-gradient(180deg, #020203 0, #020203 58px, rgba(2,2,3,.62) 98px, rgba(2,2,3,0) 150px)}
+  body.go.bajado nav::before{opacity:1}
   nav .brand{font-family:'Cormorant Garamond',serif;font-size:22px;letter-spacing:.5em;padding-left:.5em}
   nav .links{display:flex;gap:26px;font-size:11px;letter-spacing:.22em;color:var(--soft);text-transform:uppercase}
   nav .links a{cursor:pointer;transition:color .3s;color:inherit;text-decoration:none}
@@ -208,6 +222,11 @@
   .cue{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:20;font-size:10px;
     letter-spacing:.42em;color:var(--soft);text-transform:uppercase;opacity:0;transition:opacity 1s ease 3.0s}
   body.go .cue{opacity:.5;animation:bob 2.8s ease-in-out infinite 3.2s}
+  /* El aviso "mueve el ratón · scroll" es del HERO y sólo tiene sentido mientras se está EN el
+     hero. Es `position:fixed`, así que sin esto se queda flotando encima de la gorra e incluso
+     al final de la página, invitando a bajar a donde ya no hay nada. Se apaga en cuanto se
+     empieza a bajar. La clase la pone `onScroll`, que ya existe para disolver el hero. */
+  body.go.bajado .cue{opacity:0;animation:none;transition:opacity .45s ease}
   @keyframes bob{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(6px)}}
 
   .loader{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;
@@ -243,6 +262,12 @@
     -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;
     filter:drop-shadow(0 0 18px rgba(233,198,122,.14));}
   footer .fline{font-size:11px;letter-spacing:.34em;text-transform:uppercase;color:var(--soft);margin-bottom:30px}
+  /* En oro, no en gris: es el único dato accionable del pie y tiene que leerse como tal.
+     Subrayado sólo al pasar por encima -- un subrayado fijo aquí abarata la firma. */
+  footer .fwa{display:inline-block;margin-bottom:30px;text-decoration:none;
+    font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--goldh);
+    border-bottom:1px solid transparent;padding-bottom:5px;transition:border-color .45s ease}
+  footer .fwa:hover,footer .fwa:focus-visible{border-bottom-color:rgba(198,158,74,.55)}
   footer .fcopy{font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:rgba(139,135,127,.5)}
 
   /* ==== SEMENTALES · UMBRILLIO (cinematografica) ==== */
@@ -345,30 +370,79 @@
 
   /* El degradado de arriba NO es decorativo: cose la entrada transparente con el negro
      sólido de abajo. Lo heredamos de `section.block#cria`, que era la primera sección de la
-     portada y hacía justo este trabajo. Sin él se ve el canto donde acaba el hero. */
-  section.gorra{position:relative;z-index:10;padding:19vh 7vw 13vh;
-    background:linear-gradient(180deg, rgba(2,2,3,0) 0%, rgba(2,2,3,.55) 16%, var(--bg0) 34%);
-    display:grid;grid-template-columns:1.15fr .85fr;gap:clamp(30px,5vw,72px);align-items:center}
+     portada y hacía justo este trabajo. Sin él se ve el canto donde acaba el hero.
+     ⚠️ Las paradas van en PÍXELES, no en porcentaje, y es la diferencia entre que el producto
+     flote o parezca pegado. En porcentaje la parada resolvía contra el ALTO DE LA SECCIÓN, que
+     no es el mismo en cada pantalla: en el móvil la sección mide 924 px, así que el negro
+     sólido no llegaba hasta los 314 px -- y la gorra empieza en el 134. El producto caía dentro
+     del tramo translúcido, con el hero asomando por detrás, y ahí el recorte negro de la foto
+     DEJA DE COINCIDIR con el fondo: se ve el rectángulo del <img>, más claro o más oscuro según
+     la mezcla. En píxeles el negro sólido llega siempre a los 128, antes de que empiece nada. */
+  /* El reparto de la anchura es una decisión de ESCAPARATE, no de rejilla: la gorra es lo que
+     se vende, así que se lleva la parte del león (1.3 contra .7) y el margen lateral baja de
+     7vw a 5vw. Medido a 1710 px de ventana, el visor pasa de 804 a ~990 px -- la gorra se ve
+     un 23 % más grande sin que la ficha baje de las 44 columnas de texto cómodo. */
+  section.gorra{position:relative;z-index:10;padding:19vh 5vw 13vh;
+    background:linear-gradient(180deg, rgba(2,2,3,0) 0, rgba(2,2,3,.6) 46px, var(--bg0) 128px);
+    display:grid;grid-template-columns:1.3fr .7fr;gap:clamp(30px,4vw,64px);align-items:center}
 
-  /* El visor va sobre el mismo negro de la página. La gorra es negra: cualquier caja gris
-     alrededor le robaría el contorno justo donde hay que leerlo.
+  /* SIN marco y SIN caja. Antes había un borde `1px solid #14130f` y un fondo `#000` propio:
+     sobre el negro de la página eso dibujaba un rectángulo gris alrededor del producto, que es
+     justo el gesto que separa una ficha de tienda de un escaparate. La gorra tiene que FLOTAR
+     sobre el mismo negro que el resto de la página, sin nada que la enmarque.
      `touch-action:pan-y` deja arrastrar en horizontal SIN secuestrar el scroll vertical --
      el navegador decide por el primer gesto, así que girar y bajar no se pelean. Sin esto,
      en el móvil la página se queda clavada al intentar girar la gorra. */
-  .gstage{position:relative;border:1px solid #14130f;border-radius:2px;overflow:hidden;
-    background:#000;cursor:grab;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+  .gstage{position:relative;cursor:grab;touch-action:pan-y;
+    user-select:none;-webkit-user-select:none}
   .gstage.girando{cursor:grabbing}
   .gstage:focus-visible{outline:1px solid #6b5426;outline-offset:3px}
 
-  /* `contain` y no `cover`: los cuadros son 820x330 y la caja no tiene esa proporción, así
-     que recortar cortaría la visera justo en los perfiles, que es donde más vuela. */
-  #gspin{display:block;width:100%;height:min(58vh,480px);object-fit:contain;background:#000;
-    opacity:0;transition:opacity .9s ease}
-  .gstage.lista #gspin{opacity:1}
+  /* El charco de luz. Un objeto recortado contra negro puro no se apoya en nada, y el ojo lo
+     lee como un pegote, no como una foto. Sobre negro no se puede echar una sombra -- no hay
+     nada más oscuro -- así que se hace al revés: una elipse de luz MUY tenue debajo, del mismo
+     oro de la marca. No inventa producto, sólo le pone suelo. Entra con la foto, no antes. */
+  .gstage::before{content:'';position:absolute;left:50%;bottom:6%;transform:translateX(-50%);
+    width:46%;height:9%;border-radius:50%;pointer-events:none;z-index:0;
+    background:radial-gradient(ellipse at center, rgba(198,158,74,.13) 0%, rgba(198,158,74,0) 70%);
+    opacity:0;transition:opacity 1.4s ease}
+  .gstage.frente::before{opacity:1}
 
-  .ghint{position:absolute;left:0;right:0;bottom:16px;text-align:center;pointer-events:none;
+  /* `aspect-ratio` con la proporción EXACTA de los cuadros (1640x662) en lugar de una altura
+     fija: con `height:min(58vh,480px)` el `contain` dibujaba la foto a 804x324 y dejaba 78 px
+     de negro muerto arriba y otros 78 abajo DENTRO del marco. Quitar ese hueco no encoge la
+     gorra ni un píxel -- se dibujaba igual de grande -- pero borra 156 px de vacío y aprieta
+     la composición. `contain` se queda de red por si algún día cambia el recorte. */
+  #gspin{display:block;width:100%;aspect-ratio:1640/662;height:auto;object-fit:contain;
+    position:relative;z-index:1;opacity:0;transition:opacity .9s ease;
+    /* Quitar el borde no bastaba: el rectángulo seguía viéndose, sólo que al revés. Los cuadros
+       están recortados contra NEGRO PURO (#000, medido: el fondo lejano del archivo da L=0,002)
+       y la página es `--bg0` #020203 más las capas fijas del hero, que ahí suman unos cuantos
+       niveles más. La foto era más OSCURA que el fondo, y una mancha plana de 959x387 px se
+       nota aunque la diferencia sea de tres niveles.
+       `screen` lo resuelve por aritmética en vez de por ojo: mezcla 1-(1-a)(1-b), así que donde
+       la foto es 0 el resultado es EXACTAMENTE lo que haya detrás -- el negro del recorte se
+       vuelve transparente solo, sin máscara ni recorte nuevo -- y donde la foto es 1 (el hilo
+       plata) el resultado sigue siendo 1. La plata no se toca, que es la regla de la marca. */
+    mix-blend-mode:screen}
+  /* `frente` = ya está la foto de frente -> se ENSEÑA. `lista` = están las 72 -> se puede GIRAR.
+     Antes las dos cosas eran la misma clase y la gorra no aparecía hasta el último byte. */
+  .gstage.frente #gspin{opacity:1}
+  /* Hasta que no se puede girar, el cursor no promete que se pueda. */
+  .gstage:not(.lista){cursor:default}
+
+  /* FUERA de la foto, no encima. Estaba `position:absolute;bottom:16px`, es decir flotando
+     DENTRO del visor: a 1710 px caía pegado al canto de la visera y se leía sobre el tejido,
+     y en el móvil (caja de 139 px de alto) caía directamente sobre ella y además el
+     interletrado de .34em desbordaba por la derecha -- se veía "ARRASTRA PARA GIRA" con la R
+     partida. Como línea normal debajo del visor no puede tapar el producto ni salirse nunca.
+     Ocupa sitio aunque esté a opacity 0, así que la caja no da un salto al encenderse. */
+  .ghint{margin:14px 0 0;text-align:center;pointer-events:none;
     font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:#54514a;
-    transition:opacity .5s ease}
+    opacity:0;transition:opacity .5s ease}
+  /* El aviso sólo cuando es verdad: invitar a arrastrar algo que aún no responde es peor que
+     no invitar a nada. */
+  .gstage.lista .ghint{opacity:1}
   .gstage.tocada .ghint{opacity:0}
 
   /* Las 72 fotos tardan, y sin señal la caja negra parece rota. Se va sola al terminar. */
@@ -427,14 +501,34 @@
   section.gorra.in .gtxt>*:nth-child(7){transition-delay:.82s}
 
   @media (max-width:900px){
-    section.gorra{grid-template-columns:1fr;padding:15vh 7vw 11vh;gap:34px}
-    #gspin{height:min(46vh,380px)}
+    /* 18vh y no 15vh arriba: el degradado de cosido acaba a los 128 px, y a 15vh el visor
+       empezaba en el 127 -- justo en el canto. Con 18vh la gorra pisa negro sólido siempre. */
+    section.gorra{grid-template-columns:1fr;padding:18vh 6vw 11vh;gap:34px}
+    /* En una columna el visor ya ocupa todo el ancho: la altura la manda la proporción de los
+       cuadros, no un `min(46vh,380px)` que volvía a meter bandas negras. */
+
+    /* A SANGRE. Los cuadros son 1640x662 (proporción 2,48 impuesta por la visera cuando la
+       gorra se pone de perfil: medido, la gorra llega a ocupar 1192 px de ancho y sólo quedan
+       93 px de aire a la izquierda y 86 a la derecha, así que recortar no daría casi nada).
+       Con una proporción tan apaisada, cada píxel de ancho que se le quita a la caja son 0,4
+       píxeles de gorra: los 2x6vw de margen dejaban el producto en 343x139 en un iPhone.
+       Sacando el visor a los bordes de la pantalla pasa a 390x157 -- un 14 % más -- y además
+       el borde a borde es de por sí el gesto de escaparate. El texto conserva su margen. */
+    section.gorra .gvis{margin-left:-6vw;margin-right:-6vw}
+
+    /* A 390 px de ancho, .34em de interletrado no cabe: se aprieta un punto. */
+    .ghint{margin-top:12px;letter-spacing:.24em;font-size:9px}
+    .gdial{margin-top:10px}
   }
   @media (prefers-reduced-motion:reduce){
     #gspin,section.gorra .gtxt>*,section.gorra .gvis{transition:none}
   }
 </style>
-  <link rel="preload" as="image" href="spin360/17.jpg">
+  <!-- La foto de frente, y a propósito la PEQUEÑA y en JPEG: es la que enseña la gorra en los
+       primeros milisegundos, así que lo que se le pide no es resolución sino que llegue ya y no
+       falle en ningún navegador (30 KB). El juego bueno -- 1640 y WebP donde toque -- lo elige
+       el guion en cuanto mide la pantalla, y repinta este mismo hueco. -->
+  <link rel="preload" as="image" href="spin360s/17.jpg" fetchpriority="high">
 </head>
 <body>
   <div class="bg"></div>
@@ -490,7 +584,8 @@
       <div class="gstage" id="gstage" tabindex="0" role="img"
            aria-label="Gorra negra de seis paneles con la cabeza RASH bordada en hilo plata. Arrastra en horizontal para girarla.">
         <!-- La 17 es la vista de frente; el guion la deja fija en la constante FRENTE. -->
-        <img id="gspin" src="spin360/17.jpg" draggable="false" alt="">
+        <img id="gspin" src="spin360s/17.jpg" draggable="false" alt=""
+             decoding="async" fetchpriority="high">
         <div class="ghint">Arrastra para girar</div>
         <div class="gcarga" id="gcarga"></div>
       </div>
@@ -511,25 +606,37 @@
         <li><b>Visera</b><span>Plana</span></li>
       </ul>
 
-      <!-- ⚠️ PRECIO SIN DECIDIR: este número es un hueco, no un dato. Cambiarlo aquí. -->
-      <div class="gprecio">—&nbsp;€<small>Talla única</small></div>
+      <!-- PRECIO: 65 €, decidido. Si cambia, se cambia AQUÍ y también en el enlace de pago
+           (la pasarela lleva su propio importe y no lo lee de esta página: si se tocan uno y no
+           el otro, el visitante ve un precio y paga otro). -->
+      <div class="gprecio">65&nbsp;€<small>Talla única</small></div>
 
-      <!-- ⚠️ DESTINO DEL PEDIDO SIN DECIDIR. Hoy no hay ningún canal de contacto en toda la
-           web (comprobado: no hay ni un mailto, ni un wa.me, ni un tel: en ningún archivo),
-           así que este botón todavía no lleva a ninguna parte. Las tres salidas posibles:
-             WhatsApp →  href="https://wa.me/34XXXXXXXXX?text=Hola%2C%20quiero%20pedir%20la%20gorra%20RASH"
-             Correo   →  href="mailto:XXXX@XXXX?subject=Pedido%20gorra%20RASH"
-             Pago     →  enlace de pago (Stripe/SumUp), que ya cobra sin montar tienda.
-           Mientras no se decida, el botón avisa en vez de mentir. -->
-      <a class="gcta" id="gcta" href="#gorra">Hacer pedido</a>
-      <div class="gnota" id="gnota">Pedido por encargo · envío desde España</div>
+      <!-- DESTINO DEL PEDIDO: WhatsApp, +34 635 393 723.
+           Va como `href` de verdad en el HTML, NO puesto por el guion: si el JavaScript falla o
+           tarda, el único botón de la página tiene que seguir llevando a algún sitio. El día que
+           haya enlace de pago (Stripe/SumUp) se pega en la constante `PAGO` del final y ese
+           manda; mientras tanto, WhatsApp.
+           El texto va PRERRELLENADO a propósito: el mensaje llega diciendo qué gorra y a qué
+           precio, así que ni el cliente tiene que explicarse ni hay que preguntarle. -->
+      <a class="gcta" id="gcta" target="_blank" rel="noopener"
+         href="https://wa.me/34635393723?text=Hola%20RASH.%20Quiero%20pedir%20la%20gorra%20%E2%80%94%2065%20%E2%82%AC%2C%20talla%20%C3%BAnica.">Pedir por WhatsApp</a>
+      <div class="gnota" id="gnota">Edición corta, hecha por encargo · envío desde España</div>
     </div>
 
   </section>
 
+  <!-- El menú de arriba tiene un enlace "CONTACTO" que apunta AQUÍ. Hasta ahora aterrizaba en
+       una firma sin un solo dato: ni teléfono, ni correo, ni WhatsApp. En una página cuyo único
+       trabajo es recoger un pedido, eso es el agujero más caro de todos -- el visitante que ya
+       ha decidido comprar llega al final y no encuentra a quién decírselo. -->
   <footer id="contacto">
     <div class="fmark">RASH</div>
     <div class="fline">Sport Horses · Cría — Análisis — Competición — Atelier — Joyería</div>
+    <!-- Mismo destino y mismo texto prerrellenado que el botón: dos puertas, una sola
+         conversación. El número se enseña escrito además de enlazado, porque en escritorio
+         mucha gente no pulsa: lo copia al móvil. -->
+    <a class="fwa" target="_blank" rel="noopener"
+       href="https://wa.me/34635393723?text=Hola%20RASH.%20Quiero%20pedir%20la%20gorra%20%E2%80%94%2065%20%E2%82%AC%2C%20talla%20%C3%BAnica.">WhatsApp · +34 635 393 723</a>
     <div class="fcopy">© 2026 RASH Group · Todos los derechos reservados</div>
   </footer>
 
@@ -556,6 +663,9 @@
   function onScroll(){
     var y = window.scrollY || window.pageYOffset || 0;
     sp = Math.min(Math.max(y,0)/(innerHeight*0.6), 1);
+    /* Apagar el aviso de scroll en cuanto se ha movido de verdad. 40 px y no 1 px: el rebote
+       elástico del móvil y el ancla `#gorra` mueven la página sola, y no hay que castigar eso. */
+    document.body.classList.toggle('bajado', y > 40);
   }
   window.addEventListener('scroll', onScroll, {passive:true});
   onScroll();
@@ -675,7 +785,46 @@
       dial  = document.getElementById('gdial');
   if (!stage || !img) return;
 
-  var src = function(i){ return 'spin360/' + String(i).padStart(2,'0') + '.jpg'; };
+  /* --- qué juego de fotos pedir --------------------------------------------------------------
+     Hay dos entregas y dos formatos, y la elección se hace aquí una sola vez.
+
+     TAMAÑO. `spin360` va a 1640 px de ancho y `spin360s` a 820. No se elige por "móvil o no",
+     que es una pregunta que ya no contesta nada -- hay móviles con más píxeles que portátiles.
+     Se mide lo que el visor VA A PEDIR de verdad: su ancho en pantalla por la densidad de esa
+     pantalla. Un móvil de 390 px a 2x pide 780 y le sobra con el pequeño; un portátil con el
+     visor a 800 px y 2x pide 1600, y ése sí necesita el grande. Mandar 1640 a un móvil no se ve
+     mejor: se ve IGUAL, porque el navegador lo reduce de todas formas, y cuadruplica los megas
+     precisamente en la conexión más lenta de las dos.
+
+     FORMATO. El WebP pesa un tercio menos a igualdad de vista (medido sobre esta toma: 22,5 KB
+     contra 33,5 KB por cuadro). Pero no se da por hecho: se COMPRUEBA descodificando un WebP de
+     1 px incrustado en la propia página -- sin red de por medio, contesta en un fotograma.
+     ⚠️ NO se usa el truco de `canvas.toDataURL('image/webp')`, que es lo primero que se encuentra
+     por ahí. Ése pregunta si el navegador sabe ESCRIBIR WebP, y Safari supo LEERLO (versión 14)
+     dos versiones antes de saber escribirlo (16): habría mandado JPEG a Safari 14 y 15 sin
+     ninguna razón. Lo que hay que preguntar es si sabe leerlo. */
+  var JUEGO = 'spin360', EXT = '.jpg', fmtListo = false, enEspera = null;
+  function eligeJuego(){
+    var pide = (stage.clientWidth || window.innerWidth) * (window.devicePixelRatio || 1);
+    if (pide <= 900) JUEGO = 'spin360s';
+    function resuelve(webp){
+      if (fmtListo) return;                   // el que llegue primero manda; el otro no hace nada
+      if (webp) EXT = '.webp';
+      fmtListo = true;
+      visible = -1; pinta();                  // repinta el frente ya con el formato definitivo
+      if (enEspera){ var f = enEspera; enEspera = null; f(); }
+    }
+    var t = new Image();
+    t.onload = t.onerror = function(){ resuelve(t.width === 1); };
+    t.src = 'data:image/webp;base64,UklGRiQAAABXRUJQVlA4IBgAAAAwAQCdASoBAAEADMDOJaQAA3AA/uxnAAA=';
+    /* Red de la red. Un data URI de 44 bytes contesta siempre -- pero la descarga entera cuelga
+       de esta respuesta, y dejar el visor muerto para siempre por una promesa que no se cumple
+       no es un riesgo que valga la pena correr por ahorrar cuatro líneas. A los 300 ms se sigue
+       sin WebP, que es lo peor que puede pasar: pesa más, funciona igual. */
+    setTimeout(function(){ resuelve(false); }, 300);
+  }
+
+  var src = function(i){ return JUEGO + '/' + String(i).padStart(2,'0') + EXT; };
 
   /* --- la descarga ---------------------------------------------------------------------
      Aquí SÍ se espera, y es la diferencia con la página suelta `gorra.html`. Allí el visor
@@ -690,7 +839,13 @@
      BLANCO un instante, y al arrastrar deprisa eso es un parpadeo por cuadro. */
   var fotos = [], listas = 0, pedidas = false;
   function descarga(){
-    if (pedidas) return; pedidas = true;
+    if (pedidas) return;
+    /* Ni un byte antes de saber qué formato pedir. La comprobación del WebP no toca la red
+       (va incrustada), así que esto no retrasa nada -- pero sin la espera se podrían llegar a
+       pedir las 72 en JPEG y luego repetirlas en WebP: el doble de megas por un fotograma de
+       diferencia. */
+    if (!fmtListo){ enEspera = descarga; return; }
+    pedidas = true;
     for (var i = 0; i < N; i++){
       var im = new Image();
       /* Contar los fallos igual que los aciertos: si falta una foto, la barra se quedaría
@@ -698,7 +853,7 @@
       im.onload = im.onerror = function(){
         listas++;
         if (barra) barra.style.width = (listas / N * 100) + '%';
-        if (listas === N) stage.classList.add('lista');
+        if (listas === N) stage.classList.add('lista', 'frente');
       };
       im.src = src(i);
       fotos.push(im);
@@ -712,8 +867,17 @@
   } else {
     descarga();                                  // sin observador, a lo bruto
   }
-  /* Si la del frente ya estaba en caché, enciende sin esperar a las otras 71. */
-  if (img.complete && img.naturalWidth) stage.classList.add('lista');
+  /* --- cuándo se ENSEÑA y cuándo se puede GIRAR ---------------------------------------------
+     Son dos cosas distintas, y antes eran una sola: el visor no se encendía hasta tener las 72
+     fotos. En una página que vende, eso es una caja negra con una barra corriendo durante varios
+     segundos -- enseñando nada justo en el momento en que el visitante acaba de llegar al
+     producto, que es el único momento en que se le tiene.
+     Ahora la gorra ASOMA en cuanto está su foto de frente (una sola, y va precargada desde la
+     cabecera), y lo único que espera a las 72 es poder GIRARLA. Que además es lo honrado:
+     arrastrar antes de tiempo dejaría huecos en blanco cuadro a cuadro, porque cambiar el src
+     por una foto que todavía no ha llegado pinta el hueco vacío. */
+  function asoma(){ stage.classList.add('frente'); }
+  if (img.complete && img.naturalWidth) asoma(); else img.addEventListener('load', asoma);
 
   var pos = FRENTE, visible = -1;
   function pinta(){
@@ -724,14 +888,18 @@
     if (dial) dial.style.left = (i / N * 100) + '%';
   }
   pinta();
+  eligeJuego();                 // después de `pinta`, que la usa para repintar con el formato bueno
 
   /* --- el dedo -------------------------------------------------------------------------
      NO gira sola. Nunca. La gorra sólo se mueve mientras hay un dedo encima, y la inercia es
-     la prolongación de ese dedo: se apaga en menos de un segundo y se para en seco si la
-     vuelven a tocar. Ese es el trato -- lo que se mueve, se mueve porque lo han movido. */
+     la prolongación de ese dedo: se apaga sola y se para en seco si la vuelven a tocar. Ese es
+     el trato -- lo que se mueve, se mueve porque lo han movido. */
   var x0=0, base=0, arrastrando=false, vel=0, tUlt=0, xUlt=0, anim=0;
 
   stage.addEventListener('pointerdown', function(e){
+    /* Sin las 72 no se gira: cambiar el src por una foto que no ha llegado pinta el hueco en
+       BLANCO, y arrastrando deprisa eso es un parpadeo por cuadro sobre fondo negro. */
+    if (!stage.classList.contains('lista')) return;
     arrastrando = true;
     cancelAnimationFrame(anim); vel = 0;         // tocar CORTA la inercia, no la acumula
     x0 = xUlt = e.clientX; base = pos; tUlt = performance.now();
@@ -764,7 +932,17 @@
     anim = requestAnimationFrame(function tic(t){
       var dt = Math.min(t - ult, 40); ult = t;   // tope por si la pestaña estuvo dormida
       pos += vel * dt;
-      vel *= Math.pow(0.9955, dt);               // fricción fuerte: ~0,8 s y parada
+      /* La fricción, con el número puesto a propósito y no a ojo.
+         La velocidad decae como r^t, así que desde un lanzamiento de velocidad v el recorrido
+         total es v/(-ln r) cuadros y el tiempo hasta pararse ln(corte/v)/ln(r).
+         Un lanzamiento franco -- unos 300 px en 100 ms sobre un visor de 900 -- sale a v≈0,178
+         cuadros/ms. Con el 0,9955 de antes eso daba 40 cuadros: media vuelta y frenazo en 1,2 s,
+         que es lo que hacía que pareciera que la gorra se agarra. Con 0,9975 da 71 cuadros en
+         2,2 s = UNA VUELTA ENTERA, justo la que se le pide a un producto que se quiere ver
+         por todos los lados.
+         Y sigue sin girar sola: esto es la prolongación del gesto, se apaga siempre y se corta
+         en seco en cuanto la vuelven a tocar (ver el `pointerdown`). */
+      vel *= Math.pow(0.9975, dt);
       pinta();
       if (Math.abs(vel) > 0.0008) anim = requestAnimationFrame(tic);
     });
@@ -777,7 +955,7 @@
      pieza de la página. */
   stage.addEventListener('keydown', function(e){
     var paso = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
-    if (!paso) return;
+    if (!paso || !stage.classList.contains('lista')) return;   // igual que el dedo: sin las 72, no
     e.preventDefault();
     cancelAnimationFrame(anim); vel = 0;
     pos += paso * (e.shiftKey ? 6 : 1);
@@ -786,14 +964,25 @@
   });
 
   /* --- el botón ------------------------------------------------------------------------
-     Mientras el pedido no tenga destino (ver el comentario del HTML), el botón lo DICE en vez
-     de fingir que funciona: un enlace que no lleva a ningún sitio es peor que uno que avisa. */
+     Hoy el botón YA FUNCIONA sin tocar nada: lleva a WhatsApp (+34 635 393 723) con el mensaje
+     escrito, y eso está puesto en el `href` del HTML, no aquí.
+
+     ⬇️⬇️  EL DÍA QUE HAYA ENLACE DE PAGO (Stripe / SumUp), PEGARLO AQUÍ  ⬇️⬇️
+     Entre las comillas, y nada más: ni el HTML, ni el botón, ni el aviso de abajo. En cuanto
+     deje de estar vacío, el botón se convierte solo en "Hacer pedido" y va al pago. */
+  var PAGO = '';
+  /* ⬆️⬆️ --------------------------------------------------------------------------------- */
   var cta = document.getElementById('gcta'), nota = document.getElementById('gnota');
-  if (cta && cta.getAttribute('href') === '#gorra'){
-    cta.addEventListener('click', function(e){
-      e.preventDefault();
-      if (nota) nota.textContent = 'Falta conectar el pedido (WhatsApp, correo o enlace de pago).';
-    });
+  if (cta && PAGO){
+    /* El pago MANDA sobre WhatsApp cuando existe: cobra solo, sin conversación.
+       Vuelve a la MISMA pestaña -- se le quita el `target` que trae puesto para WhatsApp.
+       Abrir una pasarela en otra pestaña parece más cuidadoso pero en el móvil se lo come el
+       bloqueador la mitad de las veces, y una pasarela ya trae su propia vuelta atrás. */
+    cta.href = PAGO;
+    cta.removeAttribute('target');
+    cta.setAttribute('rel', 'noopener');
+    cta.textContent = 'Hacer pedido';
+    if (nota) nota.textContent = 'Pago seguro · edición corta · envío desde España';
   }
 })();
 </script>
