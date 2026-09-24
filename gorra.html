@@ -428,7 +428,11 @@
        la foto es 0 el resultado es EXACTAMENTE lo que haya detrás -- el negro del recorte se
        vuelve transparente solo, sin máscara ni recorte nuevo -- y donde la foto es 1 (el hilo
        plata) el resultado sigue siendo 1. La plata no se toca, que es la regla de la marca. */
-    mix-blend-mode:screen}
+    mix-blend-mode:screen;
+    /* La lupa amplía desde la esquina, no desde el centro: toda la cuenta de "que el punto que
+       miras no se te escape" está hecha en coordenadas de la caja, y con el origen en el centro
+       habría que arrastrar medio ancho en cada paso. */
+    transform-origin:0 0}
 
   /* Las dos capas ocupan exactamente el mismo hueco. La primera es la que MIDE (va en flujo y
      le da alto a la caja con su proporción); la segunda se apoya encima sin ocupar sitio.
@@ -457,6 +461,31 @@
      interletrado de .34em desbordaba por la derecha -- se veía "ARRASTRA PARA GIRA" con la R
      partida. Como línea normal debajo del visor no puede tapar el producto ni salirse nunca.
      Ocupa sitio aunque esté a opacity 0, así que la caja no da un salto al encenderse. */
+  /* --- la lupa ------------------------------------------------------------------------------
+     Sin recorte, ampliar la gorra la derramaría por encima del texto y del aviso de abajo. El
+     recorte va en el envoltorio, no en el escenario: el escenario incluye la tira del aviso y
+     recortando ahí la gorra ampliada se comería ese renglón. */
+  .gclip{position:relative;overflow:hidden}
+
+  .gzoom{position:absolute;bottom:12px;right:12px;z-index:3;display:flex;flex-direction:column;
+    align-items:center;gap:6px;pointer-events:none;
+    opacity:0;transition:opacity .6s ease}
+  .gstage.lista .gzoom{opacity:1}
+  .gzoom button{pointer-events:auto;width:34px;height:34px;padding:0;cursor:pointer;
+    background:rgba(8,8,9,.55);border:1px solid #1d1b16;color:#8a8478;
+    font:400 17px/1 'Jost',system-ui,sans-serif;
+    -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+    transition:color .25s ease,border-color .25s ease}
+  .gzoom button:hover{color:var(--goldh);border-color:#4a3a1c}
+  .gzoom button:disabled{opacity:.28;cursor:default}
+  .gzoom button:focus-visible{outline:1px solid #6b5426;outline-offset:2px}
+  .gzoom span{font-size:9px;letter-spacing:.2em;color:#54514a;min-width:22px;text-align:center}
+  /* Ampliada, el cursor deja de prometer que se arrastra la página y promete la gorra. */
+  .gstage.zoom{cursor:grab}
+
+  .ghint2{color:#3b3933}
+  @media (max-width:640px){ .ghint2{display:none} }
+
   .ghint{margin:14px 0 0;text-align:center;pointer-events:none;
     font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:#54514a;
     opacity:0;transition:opacity .5s ease}
@@ -611,6 +640,12 @@
              cuadro anterior, la de arriba el siguiente, y la parte decimal del giro es
              directamente la opacidad de la de arriba. El movimiento pasa a ser continuo.
              La 17 es la vista de frente; el guion la deja fija en la constante FRENTE. -->
+        <!-- `gclip` sólo existe para RECORTAR la gorra ampliada, y no lleva `z-index` ni
+             `isolation` a propósito: cualquiera de las dos crearía un contexto de apilado y el
+             `mix-blend-mode:screen` de `gfilm` dejaría de alcanzar la página -- el negro del
+             recorte volvería a verse como un rectángulo oscuro sobre el fondo. Recortar sí,
+             aislar no. -->
+        <div class="gclip">
         <div class="gfilm" id="gfilm">
           <img id="gspin" src="spin360s/17.jpg" draggable="false" alt=""
                decoding="async" fetchpriority="high">
@@ -619,7 +654,21 @@
                veces. -->
           <img id="gspin2" draggable="false" alt="" aria-hidden="true" decoding="async">
         </div>
-        <div class="ghint">Arrastra para girar</div>
+
+        <!-- El mando de la lupa va dentro del RECORTE, no del escenario, y abajo. Puesto arriba
+             quedaba tapado por la barra de navegación, que es fija: al llegar la sección a lo
+             alto de la pantalla, los botones desaparecían debajo del menú. Abajo a la derecha
+             hay negro de sobra y nunca se cruza con nada.
+             No se lleva el dedo: los botones tienen su propio `pointer-events` y su `pointerdown`
+             se corta ahí, el resto de la caja sigue girando. -->
+        <div class="gzoom" id="gzoom">
+          <button type="button" id="gmas"  aria-label="Acercar">+</button>
+          <span id="gniv" aria-live="polite">1&times;</span>
+          <button type="button" id="gmenos" aria-label="Alejar">&minus;</button>
+        </div>
+        </div>
+
+        <div class="ghint">Arrastra para girar<span class="ghint2"> &nbsp;·&nbsp; usa + para ver el bordado</span></div>
         <div class="gcarga" id="gcarga"></div>
       </div>
       <div class="gdial"><i id="gdial"></i></div>
@@ -975,6 +1024,51 @@
      -0.915,  -0.854,  -0.854,  -1.159,  -1.159,  -0.610,  -0.549,  -0.183
   ];
 
+  /* --- lo que la traslación NO puede arreglar: el fundido SÓLO cuando corre ------------------
+     Alinear quitó el grueso del bordado doble, pero no todo, y merece la pena decir por qué en
+     vez de seguir apretando tornillos. Se volvió a medir siguiendo el HILO PLATA en concreto
+     (correlación sobre los píxeles claros, no sobre la copa entera): da los mismos números que
+     la copa, ±2 px. O sea que el desplazamiento ya está bien corregido y lo que queda NO es
+     desplazamiento -- es que el logo CAMBIA DE FORMA al rodar 5 grados sobre una copa curva. Se
+     estrecha por un lado y se ensancha por el otro. Eso no lo arregla ninguna traslación, y
+     fingir que sí sería inventarse una interpolación 3D que no tenemos.
+
+     Así que se ataca por donde se ve, que es el ojo. El fundido sólo estorba cuando la gorra va
+     DESPACIO, porque entonces la vista tiene tiempo de resolver las dos capas y lee "dos logos".
+     Yendo deprisa esas mismas dos capas se leen como rastro de movimiento -- que es justo lo que
+     hace bonito el giro y por lo que se puso el fundido.
+
+     Entonces el fundido se ata a la velocidad: parada o lenta, UNA foto sola y nítida; rápida,
+     fundido entero. `nitidez` va de 0 (fundido completo) a 1 (foto limpia) y se mueve suave, sin
+     escalones. Y ojo al detalle que lo salva: aunque la opacidad se vaya a 0 ó 1, el CORRIMIENTO
+     se sigue aplicando con el decimal de verdad. Así que despacio la gorra no va a saltos: se
+     desliza de forma continua, sólo que enseñando una foto sola. Nitidez y continuidad a la vez,
+     que era la pelea. */
+  var nitidez = 1, posAnt = 0, tAnt = 0, relojNitidez = 0;
+  var V_LENTO = 0.0015, V_RAPIDO = 0.0100;   // cuadros por milisegundo
+  function mideRapidez(){
+    var t = performance.now();
+    if (!tAnt){ tAnt = t; posAnt = pos; }
+    else {
+      var dt = t - tAnt;
+      if (dt > 4){
+        var v = Math.abs(pos - posAnt) / dt;
+        var f = (v - V_LENTO) / (V_RAPIDO - V_LENTO);
+        f = f < 0 ? 0 : f > 1 ? 1 : f;
+        /* Se persigue el objetivo en vez de saltar a él: un cambio brusco de nitidez a mitad de
+           giro se vería como un parpadeo de foco. 0,25 por fotograma tarda ~5 en llegar. */
+        nitidez += ((1 - f) - nitidez) * 0.25;
+        posAnt = pos; tAnt = t;
+      }
+    }
+    /* Si el dedo se queda QUIETO sin levantarse, no llega ningún evento más y la gorra se
+       quedaría congelada a mitad de fundido -- el bordado doble, fijo en pantalla, que es el
+       peor caso de todos. A los 90 ms sin noticias se declara parada y se repinta limpia. */
+    clearTimeout(relojNitidez);
+    relojNitidez = setTimeout(function(){ nitidez = 1; tAnt = 0; pinta(); }, 90);
+  }
+  function repinta(){ mideRapidez(); pinta(); }
+
   var pos = FRENTE, visible = -1, visible2 = -1;
   function vuelve(i){ return ((i % N) + N) % N; }   // 72 -> 0, -1 -> 71: la vuelta no tiene canto
   function pinta(){
@@ -985,7 +1079,10 @@
        y eso sí se nota. Lo que cambia sesenta veces por segundo es sólo la opacidad. */
     if (a !== visible){ visible = a; img.src = src(a); }
     if (b !== visible2){ visible2 = b; img2.src = src(b); }
-    img2.style.opacity = dec;
+    /* La opacidad se empuja hacia 0 ó 1 según la nitidez: a nitidez 1 sólo se ve UNA de las dos
+       capas, a nitidez 0 se ven las dos como antes. `dec` sin tocar seguiría abajo mandando en el
+       corrimiento, que es lo que mantiene el movimiento continuo. */
+    img2.style.opacity = dec + (Math.round(dec) - dec) * nitidez;
     /* Alinear las dos capas antes de que se mezclen (ver arriba). Con `dec` a 0 -- que es como se
        queda siempre parada, porque `encaja()` la lleva al cuadro entero -- las dos vuelven a 0 y
        lo que se ve es la foto en su sitio, sin correr ni un píxel. */
@@ -997,6 +1094,129 @@
   }
   pinta();
   eligeJuego();                 // después de `pinta`, que la usa para repintar con el formato bueno
+
+  /* --- LA LUPA -------------------------------------------------------------------------------
+     Una gorra de 65 euros se vende por el bordado, y el bordado a tamaño de página mide dos
+     centímetros. Que se pueda acercar no es un adorno: es la prueba de que el hilo es hilo.
+
+     Tres detalles que no son obvios:
+
+     · Se amplía HACIA DONDE MIRAS, no hacia el centro. Con la rueda o con dos dedos, el punto
+       que está bajo el cursor se queda clavado donde estaba -- `t2 = p - (z2/z)·(p - t)`. Ampliar
+       siempre al centro obliga a perseguir la pieza a cada paso.
+     · Al pasar de 1 se cambia al juego GRANDE. En móvil se sirven las fotos de 820 px, que a
+       tamaño de página son de sobra; ampliadas serían una mancha. Las de 1640 se piden sólo
+       cuando alguien pide ver de cerca -- que es la única vez que justifican sus megas.
+     · Ampliada, la gorra SIGUE GIRANDO con el dedo. No hay modo lupa ni modo giro: es la misma
+       pieza más cerca. El trato de la página (lo que se mueve, se mueve porque lo han movido) no
+       cambia por acercarse. */
+  var film = document.getElementById('gfilm'), clip = film.parentNode,
+      bMas = document.getElementById('gmas'), bMenos = document.getElementById('gmenos'),
+      niv  = document.getElementById('gniv');
+  var z = 1, tx = 0, ty = 0, ZMIN = 1, ZMAX = 2, ANCHO_FOTO = 1640, grandePedida = false;
+
+  /* Hasta dónde se deja acercar: NO un número redondo, sino hasta donde la foto tiene detalle de
+     verdad. A escala 1 la gorra ya viene reducida (1640 px de archivo en una caja de ~1100), así
+     que hay margen gratis hasta llegar a tamaño nativo. Pasado eso el navegador empieza a
+     inventar píxeles y el bordado se vuelve una mancha -- justo lo contrario de lo que se viene
+     a enseñar. Se permite un 40% por encima de lo nativo, que es donde todavía parece tejido, y
+     se recalcula al cambiar la ventana porque el tope depende del ancho de la caja.
+     En un móvil la caja es estrecha y el tope sale alto (3x de sobra); en un monitor grande sale
+     bajo. Es el mismo criterio, no dos reglas. */
+  function topeZoom(){
+    var w = clip.clientWidth || 1;
+    var t = Math.round(ANCHO_FOTO / w * 1.4 * 10) / 10;
+    return t < 1.6 ? 1.6 : t > 3 ? 3 : t;
+  }
+
+  function subeCalidad(){
+    if (grandePedida) return;
+    grandePedida = true;
+    if (JUEGO === 'spin360') return;            // ya estaba en grande: nada que pedir
+    JUEGO = 'spin360';
+    visible = visible2 = -1; pinta();           // el cuadro de ahora, ya en grande
+    /* Van a `fotos` por lo mismo que las otras: una imagen sin referencia viva es candidata a
+       que el navegador la tire, y entonces girar ampliado parpadearía cuadro a cuadro. */
+    for (var i = 0; i < N; i++){ var im = new Image(); im.src = src(i); fotos.push(im); }
+  }
+
+  function limita(){
+    /* Nunca se puede dejar un borde al aire: el desplazamiento se acota para que la foto
+       ampliada cubra la caja entera. A escala 1 esto devuelve el desplazamiento a cero solo. */
+    var w = clip.clientWidth, h = clip.clientHeight, mx = w * (1 - z), my = h * (1 - z);
+    if (tx > 0) tx = 0; if (tx < mx) tx = mx;
+    if (ty > 0) ty = 0; if (ty < my) ty = my;
+  }
+  function aplica(){
+    film.style.transform = z > 1.001
+      ? 'translate(' + tx.toFixed(1) + 'px,' + ty.toFixed(1) + 'px) scale(' + z.toFixed(3) + ')'
+      : '';                                     // a escala 1, transform VACÍO: ni una capa de más
+    stage.classList.toggle('zoom', z > 1.001);
+    if (niv) niv.innerHTML = (Math.round(z * 10) / 10) + '&times;';
+    if (bMenos) bMenos.disabled = z <= ZMIN + 0.001;
+    if (bMas)   bMas.disabled   = z >= ZMAX - 0.001;
+  }
+  function pon(z2, px, py){
+    z2 = z2 < ZMIN ? ZMIN : z2 > ZMAX ? ZMAX : z2;
+    if (Math.abs(z2 - z) < 0.001) return;
+    var w = clip.clientWidth, h = clip.clientHeight;
+    /* Sin foco (los botones) se apunta a la COPA, no al centro de la caja. El centro geométrico
+       de un recorte 1640x662 cae en la costura de la visera; el bordado, que es lo que se viene
+       a mirar, está más arriba. Acercar al centro obligaba a perseguirlo girando. */
+    if (px == null){ px = w / 2; py = h * 0.40; }
+    tx = px - (z2 / z) * (px - tx);
+    ty = py - (z2 / z) * (py - ty);
+    z = z2; limita(); aplica();
+    if (z > 1.001) subeCalidad();
+  }
+  /* Los botones viven DENTRO del escenario, así que su `pointerdown` subiría hasta el gestor del
+     giro: pulsar la lupa con el dedo un poco tembloroso movería la gorra. Se corta ahí. */
+  var mando = document.getElementById('gzoom');
+  if (mando) ['pointerdown','pointermove','pointerup'].forEach(function(ev){
+    mando.addEventListener(ev, function(e){ e.stopPropagation(); });
+  });
+  /* Dos toques llegan al tope, dos toques vuelven. Un paso fijo de 0,5 dejaba el último clic
+     a medias en unas pantallas y de sobra en otras, porque el tope ya no es el mismo para todas. */
+  function paso(){ return (ZMAX - ZMIN) / 2; }
+  if (bMas)   bMas.addEventListener('click', function(){ pon(z + paso()); });
+  if (bMenos) bMenos.addEventListener('click', function(){ pon(z - paso()); });
+
+  /* Rueda sólo con Ctrl -- que es lo que manda el navegador cuando se pellizca en el trackpad.
+     Secuestrar la rueda a secas dejaría la página sin poder bajar justo encima de la gorra. */
+  stage.addEventListener('wheel', function(e){
+    if (!e.ctrlKey) return;
+    e.preventDefault();
+    var r = clip.getBoundingClientRect();
+    pon(z * (1 - e.deltaY * 0.012), e.clientX - r.left, e.clientY - r.top);
+  }, {passive:false});
+
+  /* Dos dedos en el móvil. Se puede porque el escenario declara `touch-action:pan-y`: con eso el
+     navegador se queda el desplazamiento vertical de la página y nos cede el pellizco. */
+  var pinD = 0, pinZ = 1;
+  function sep(t){ var dx = t[0].clientX - t[1].clientX, dy = t[0].clientY - t[1].clientY;
+                   return Math.sqrt(dx * dx + dy * dy); }
+  stage.addEventListener('touchstart', function(e){
+    if (e.touches.length !== 2) return;
+    pinD = sep(e.touches); pinZ = z;
+    arrastrando = false; stage.classList.remove('girando');   // pellizcar no es girar
+  }, {passive:true});
+  stage.addEventListener('touchmove', function(e){
+    if (e.touches.length !== 2 || !pinD) return;
+    e.preventDefault();
+    var r = clip.getBoundingClientRect();
+    pon(pinZ * sep(e.touches) / pinD,
+        (e.touches[0].clientX + e.touches[1].clientX) / 2 - r.left,
+        (e.touches[0].clientY + e.touches[1].clientY) / 2 - r.top);
+  }, {passive:false});
+  stage.addEventListener('touchend', function(e){ if (e.touches.length < 2) pinD = 0; });
+
+  /* Al cambiar el tamaño de la ventana la caja cambia y el desplazamiento guardado puede dejar
+     un borde al aire. Se vuelve a acotar con las medidas nuevas. */
+  window.addEventListener('resize', function(){
+    ZMAX = topeZoom(); if (z > ZMAX) pon(ZMAX);
+    limita(); aplica();
+  });
+  ZMAX = topeZoom(); aplica();
 
   /* --- el dedo -------------------------------------------------------------------------
      NO gira sola. Nunca. La gorra sólo se mueve mientras hay un dedo encima, y la inercia es
@@ -1026,7 +1246,7 @@
     /* Velocidad del último tramo, no de todo el gesto: si alguien arrastra despacio y suelta
        de golpe, lo que manda es el golpe final. */
     if (dt > 8){ vel = -(e.clientX - xUlt) * porPx / dt; tUlt = t; xUlt = e.clientX; }
-    pinta();
+    repinta();          // `repinta` = medir la rapidez del gesto + pintar con la nitidez que toque
   });
 
   /* --- ENCAJAR al parar ----------------------------------------------------------------------
@@ -1040,6 +1260,10 @@
      mucho -- 9 px de gorra, dos décimas de segundo -- así que no se lee como un tirón sino como
      que la pieza se ASIENTA. Y lo que queda quieto es siempre una foto sola y nítida. */
   function encaja(){
+    /* Encajar es, por definición, ir a parar. Nada de fundido durante el viaje: se cancela el
+       reloj de la nitidez y se fuerza a 1, porque si no los 190 ms del asiento se harían con
+       las dos capas encendidas -- despacio, que es el peor momento para tenerlas. */
+    clearTimeout(relojNitidez); nitidez = 1; tAnt = 0;
     var destino = Math.round(pos), salida = pos, d = destino - salida;
     if (Math.abs(d) < 0.003){ pos = destino; pinta(); return; }
     var t0 = performance.now(), DUR = 190;
@@ -1075,7 +1299,7 @@
          Y sigue sin girar sola: esto es la prolongación del gesto, se apaga siempre y se corta
          en seco en cuanto la vuelven a tocar (ver el `pointerdown`). */
       vel *= Math.pow(0.9975, dt);
-      pinta();
+      repinta();        // la inercia también se va afilando sola según frena
       /* Cuando la inercia se apaga NO se abandona a media mezcla: se encaja igual que cuando la
          sueltan sin impulso. El final de una vuelta lanzada es justo el momento en que el
          visitante se queda mirando. */
