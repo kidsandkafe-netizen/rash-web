@@ -481,7 +481,12 @@
   .gzoom button:focus-visible{outline:1px solid #6b5426;outline-offset:2px}
   .gzoom span{font-size:9px;letter-spacing:.2em;color:#54514a;min-width:22px;text-align:center}
   /* Ampliada, el cursor deja de prometer que se arrastra la página y promete la gorra. */
-  .gstage.zoom{cursor:grab}
+  /* Ampliada el dedo pasa a MOVER la foto, así que hace falta también el vertical. Con el
+     `pan-y` de siempre, arrastrar hacia arriba se lo quedaba el navegador para bajar la página y
+     la foto no subía: parecía que el zoom estaba clavado. A escala 1 vuelve el `pan-y`, que es lo
+     que deja bajar la página con el dedo encima de la gorra. */
+  .gstage.zoom{cursor:grab;touch-action:none}
+  .gstage.zoom.movida{cursor:grabbing}
 
   .ghint2{color:#3b3933}
   @media (max-width:640px){ .ghint2{display:none} }
@@ -1033,41 +1038,32 @@
      estrecha por un lado y se ensancha por el otro. Eso no lo arregla ninguna traslación, y
      fingir que sí sería inventarse una interpolación 3D que no tenemos.
 
-     Así que se ataca por donde se ve, que es el ojo. El fundido sólo estorba cuando la gorra va
-     DESPACIO, porque entonces la vista tiene tiempo de resolver las dos capas y lee "dos logos".
-     Yendo deprisa esas mismas dos capas se leen como rastro de movimiento -- que es justo lo que
-     hace bonito el giro y por lo que se puso el fundido.
+     Se intentó taparlo con un fundido atado a la velocidad: despacio una foto sola, deprisa las
+     dos mezcladas como rastro de movimiento. Y deprisa EL BORDADO SE APAGABA. Medido sobre las 72
+     parejas, contando sólo los píxeles de hilo (los claros por encima de 140), cuánto se solapan
+     los dos logos y cuánto brillo queda al mezclarlos a mitad de paso:
 
-     Entonces el fundido se ata a la velocidad: parada o lenta, UNA foto sola y nítida; rápida,
-     fundido entero. `nitidez` va de 0 (fundido completo) a 1 (foto limpia) y se mueve suave, sin
-     escalones. Y ojo al detalle que lo salva: aunque la opacidad se vaya a 0 ó 1, el CORRIMIENTO
-     se sigue aplicando con el decimal de verdad. Así que despacio la gorra no va a saltos: se
-     desliza de forma continua, sólo que enseñando una foto sola. Nitidez y continuidad a la vez,
-     que era la pelea. */
-  var nitidez = 1, posAnt = 0, tAnt = 0, relojNitidez = 0;
-  var V_LENTO = 0.0015, V_RAPIDO = 0.0100;   // cuadros por milisegundo
-  function mideRapidez(){
-    var t = performance.now();
-    if (!tAnt){ tAnt = t; posAnt = pos; }
-    else {
-      var dt = t - tAnt;
-      if (dt > 4){
-        var v = Math.abs(pos - posAnt) / dt;
-        var f = (v - V_LENTO) / (V_RAPIDO - V_LENTO);
-        f = f < 0 ? 0 : f > 1 ? 1 : f;
-        /* Se persigue el objetivo en vez de saltar a él: un cambio brusco de nitidez a mitad de
-           giro se vería como un parpadeo de foco. 0,25 por fotograma tarda ~5 en llegar. */
-        nitidez += ((1 - f) - nitidez) * 0.25;
-        posAnt = pos; tAnt = t;
-      }
-    }
-    /* Si el dedo se queda QUIETO sin levantarse, no llega ningún evento más y la gorra se
-       quedaría congelada a mitad de fundido -- el bordado doble, fijo en pantalla, que es el
-       peor caso de todos. A los 90 ms sin noticias se declara parada y se repinta limpia. */
-    clearTimeout(relojNitidez);
-    relojNitidez = setTimeout(function(){ nitidez = 1; tAnt = 0; pinta(); }, 90);
-  }
-  function repinta(){ mideRapidez(); pinta(); }
+         de frente  (13->17) .... solapan 93..97%  ->  queda el  99..101% del brillo
+         de perfil  (28->42) .... solapan  1..14%  ->  queda el  55.. 64% del brillo
+         lo peor    (68->69) .... solapan     0%   ->  queda el      50% del brillo
+
+     De frente los dos logos caen casi uno encima del otro y mezclarlos no cuesta nada. De perfil
+     el logo se ve de canto y cambia tanto de forma que no llegan a solaparse: promediar al 50%
+     dos cosas que no coinciden deja cada una a media luz, y sobre negro media luz de plata se lee
+     como gris sucio. No era sensación, eran 45 puntos de brillo.
+
+     Un fundido, por definición, PROMEDIA. Sumar en vez de promediar (modo pantalla) devuelve el
+     brillo -- +20% medido -- pero entonces se ven los dos logos enteros, que era la queja de
+     antes. Promediar apaga; sumar duplica. No hay un tercer fundido.
+
+     Así que no se funde: se enseña SIEMPRE UNA SOLA FOTO, limpia. La continuidad no la daba la
+     mezcla, la da el CORRIMIENTO -- la foto se desliza con el decimal del giro, y el relevo de una
+     capa a la otra cae justo a mitad de paso, que es donde las dos están EN EL MISMO SITIO (una
+     corrida media distancia hacia adelante, la otra media hacia atrás). El cambio de capa no se
+     ve, y lo que hay en pantalla es siempre plata a plena luz.
+
+     Las dos capas siguen haciendo falta aunque sólo se vea una: la escondida va por delante
+     cargando el cuadro siguiente, así que el relevo nunca pilla una imagen sin decodificar. */
 
   var pos = FRENTE, visible = -1, visible2 = -1;
   function vuelve(i){ return ((i % N) + N) % N; }   // 72 -> 0, -1 -> 71: la vuelta no tiene canto
@@ -1079,10 +1075,9 @@
        y eso sí se nota. Lo que cambia sesenta veces por segundo es sólo la opacidad. */
     if (a !== visible){ visible = a; img.src = src(a); }
     if (b !== visible2){ visible2 = b; img2.src = src(b); }
-    /* La opacidad se empuja hacia 0 ó 1 según la nitidez: a nitidez 1 sólo se ve UNA de las dos
-       capas, a nitidez 0 se ven las dos como antes. `dec` sin tocar seguiría abajo mandando en el
-       corrimiento, que es lo que mantiene el movimiento continuo. */
-    img2.style.opacity = dec + (Math.round(dec) - dec) * nitidez;
+    /* 0 ó 1, nunca en medio: se ve UNA capa entera. `dec` sigue mandando abajo en el corrimiento,
+       que es lo que mantiene el movimiento continuo sin necesidad de mezclar nada. */
+    img2.style.opacity = Math.round(dec);
     /* Alinear las dos capas antes de que se mezclen (ver arriba). Con `dec` a 0 -- que es como se
        queda siempre parada, porque `encaja()` la lleva al cuadro entero -- las dos vuelven a 0 y
        lo que se ve es la foto en su sitio, sin correr ni un píxel. */
@@ -1198,7 +1193,8 @@
   stage.addEventListener('touchstart', function(e){
     if (e.touches.length !== 2) return;
     pinD = sep(e.touches); pinZ = z;
-    arrastrando = false; stage.classList.remove('girando');   // pellizcar no es girar
+    arrastrando = moviendo = false;                           // pellizcar no es ni girar ni mover
+    stage.classList.remove('girando','movida');
   }, {passive:true});
   stage.addEventListener('touchmove', function(e){
     if (e.touches.length !== 2 || !pinD) return;
@@ -1223,11 +1219,24 @@
      la prolongación de ese dedo: se apaga sola y se para en seco si la vuelven a tocar. Ese es
      el trato -- lo que se mueve, se mueve porque lo han movido. */
   var x0=0, base=0, arrastrando=false, vel=0, tUlt=0, xUlt=0, anim=0;
+  var moviendo=false, mx0=0, my0=0, tx0=0, ty0=0;   // el mismo dedo, cuando está ampliada
 
   stage.addEventListener('pointerdown', function(e){
     /* Sin las 72 no se gira: cambiar el src por una foto que no ha llegado pinta el hueco en
        BLANCO, y arrastrando deprisa eso es un parpadeo por cuadro sobre fondo negro. */
     if (!stage.classList.contains('lista')) return;
+    /* AMPLIADA EL DEDO NO GIRA: mueve la foto. Es lo que hace cualquier visor de fotos, lo que el
+       cursor ya prometía (`grab`) y lo único que tiene sentido cuando alguien está mirando el
+       hilo de cerca -- girar ampliado saca el bordado de la pantalla en dos dedos de gesto.
+       Para volver a girar se sale del zoom; las flechas del teclado giran siempre, ampliada o no. */
+    if (z > 1.001){
+      moviendo = true;
+      mx0 = e.clientX; my0 = e.clientY; tx0 = tx; ty0 = ty;
+      cancelAnimationFrame(anim); vel = 0;
+      stage.setPointerCapture(e.pointerId);
+      stage.classList.add('tocada','movida');
+      return;
+    }
     arrastrando = true;
     cancelAnimationFrame(anim); vel = 0;         // tocar CORTA la inercia, no la acumula
     x0 = xUlt = e.clientX; base = pos; tUlt = performance.now();
@@ -1236,6 +1245,15 @@
   });
 
   stage.addEventListener('pointermove', function(e){
+    if (moviendo){
+      /* Píxel de dedo = píxel de pantalla, sin dividir por la escala: lo que se arrastra es la
+         foto YA ampliada, así que se mueve exactamente lo que se mueve la mano. `limita` impide
+         sacar un borde al aire. */
+      tx = tx0 + (e.clientX - mx0);
+      ty = ty0 + (e.clientY - my0);
+      limita(); aplica();
+      return;
+    }
     if (!arrastrando) return;
     /* Arrastrar a la derecha empuja la gorra a la derecha, o sea que la cara que mira al
        visitante se va por ese lado: el índice BAJA, porque la secuencia está grabada girando
@@ -1246,24 +1264,19 @@
     /* Velocidad del último tramo, no de todo el gesto: si alguien arrastra despacio y suelta
        de golpe, lo que manda es el golpe final. */
     if (dt > 8){ vel = -(e.clientX - xUlt) * porPx / dt; tUlt = t; xUlt = e.clientX; }
-    repinta();          // `repinta` = medir la rapidez del gesto + pintar con la nitidez que toque
+    pinta();
   });
 
   /* --- ENCAJAR al parar ----------------------------------------------------------------------
-     El fundido es la verdad MIENTRAS se gira: dos cuadros a la vez leen como el rastro del
-     movimiento, igual que una foto de algo que pasa deprisa. Pero parada es una mentira. Si el
-     dedo se levanta justo a mitad de paso, la gorra se queda enseñando medio cuadro 13 y medio
-     14 -- y como la gorra no está clavada entre cuadro y cuadro (su centro se mueve una media de
-     11 px), eso se ve como un BORDADO DOBLE, dos cabezas de caballo solapadas. En un producto de
-     lujo eso no es un efecto, es un defecto.
-     Así que al pararse se desliza al cuadro entero más cercano. Es un viaje de medio cuadro como
-     mucho -- 9 px de gorra, dos décimas de segundo -- así que no se lee como un tirón sino como
-     que la pieza se ASIENTA. Y lo que queda quieto es siempre una foto sola y nítida. */
+     Ya no hay fundido, pero encajar sigue haciendo falta, y por una razón distinta: a mitad de
+     paso la foto que se ve está CORRIDA (hasta media distancia entre cuadro y cuadro, que medido
+     sobre la copa son 17,5 px de media y 36 px en lo peor, sobre 1640 de ancho). Corrida no está
+     mal mientras se mueve -- es lo que hace el movimiento continuo -- pero parada deja la gorra
+     descentrada respecto a su sombra y al espacio de la caja, y eso en un producto de lujo se ve.
+     Así que al pararse se desliza al cuadro entero más cercano: medio paso como mucho, dos
+     décimas de segundo, y no se lee como un tirón sino como que la pieza se ASIENTA. Lo que
+     queda quieto es siempre una foto entera, en su sitio y sin corrimiento. */
   function encaja(){
-    /* Encajar es, por definición, ir a parar. Nada de fundido durante el viaje: se cancela el
-       reloj de la nitidez y se fuerza a 1, porque si no los 190 ms del asiento se harían con
-       las dos capas encendidas -- despacio, que es el peor momento para tenerlas. */
-    clearTimeout(relojNitidez); nitidez = 1; tAnt = 0;
     var destino = Math.round(pos), salida = pos, d = destino - salida;
     if (Math.abs(d) < 0.003){ pos = destino; pinta(); return; }
     var t0 = performance.now(), DUR = 190;
@@ -1278,6 +1291,7 @@
   }
 
   function suelta(){
+    if (moviendo){ moviendo = false; stage.classList.remove('movida'); return; }
     if (!arrastrando) return;
     arrastrando = false;
     stage.classList.remove('girando');
@@ -1299,7 +1313,7 @@
          Y sigue sin girar sola: esto es la prolongación del gesto, se apaga siempre y se corta
          en seco en cuanto la vuelven a tocar (ver el `pointerdown`). */
       vel *= Math.pow(0.9975, dt);
-      repinta();        // la inercia también se va afilando sola según frena
+      pinta();
       /* Cuando la inercia se apaga NO se abandona a media mezcla: se encaja igual que cuando la
          sueltan sin impulso. El final de una vuelta lanzada es justo el momento en que el
          visitante se queda mirando. */
