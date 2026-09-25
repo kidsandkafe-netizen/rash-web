@@ -863,7 +863,7 @@
 
     <div class="gtxt">
       <p>Seis paneles de sarga de lana, costura de aguja doble y la cabeza facetada bordada
-         en hilo plata. Visera plana con seis pespuntes y cierre trasero regulable.
+         en hilo plata. Visera plana con seis pespuntes y cierre trasero snapback.
          Gírala con el dedo.</p>
 
       <ul class="gspecs">
@@ -876,17 +876,22 @@
       <!-- PRECIO: 65 €, decidido. Si cambia, se cambia AQUÍ y también en el enlace de pago
            (la pasarela lleva su propio importe y no lo lee de esta página: si se tocan uno y no
            el otro, el visitante ve un precio y paga otro). -->
-      <div class="gprecio">65&nbsp;€<small>Talla única</small></div>
+      <div class="gprecio">65&nbsp;€<small>Talla única · snapback</small></div>
 
       <!-- DESTINO DEL PEDIDO: WhatsApp, +34 635 393 723.
            Va como `href` de verdad en el HTML, NO puesto por el guion: si el JavaScript falla o
            tarda, el único botón de la página tiene que seguir llevando a algún sitio. El día que
            haya enlace de pago (Stripe/SumUp) se pega en la constante `PAGO` del final y ese
            manda; mientras tanto, WhatsApp.
+           El mensaje del BOTON va ya con la plantilla de datos de envio (nombre, direccion,
+           CP+ciudad, telefono) para no tener que pedirlos uno a uno por chat. Si cambia el
+           precio, ojo: aparece DOS veces, en la cifra visible y dentro de este mensaje.
+           El enlace del PIE va sin plantilla a proposito: desde el pie mucha gente escribe
+           para preguntar, y recibir un formulario cuando solo ibas a preguntar echa para atras.
            El texto va PRERRELLENADO a propósito: el mensaje llega diciendo qué gorra y a qué
            precio, así que ni el cliente tiene que explicarse ni hay que preguntarle. -->
       <a class="gcta" id="gcta" target="_blank" rel="noopener"
-         href="https://wa.me/34635393723?text=Hola%20RASH.%20Quiero%20pedir%20la%20gorra%20%E2%80%94%2065%20%E2%82%AC%2C%20talla%20%C3%BAnica.">Pedir por WhatsApp</a>
+         href="https://wa.me/34635393723?text=Hola%20RASH.%20Quiero%20pedir%20la%20gorra%20%E2%80%94%2065%20%E2%82%AC%2C%20talla%20%C3%BAnica.%0A%0ANombre%20y%20apellidos%3A%0ADirecci%C3%B3n%3A%0AC%C3%B3digo%20postal%20y%20ciudad%3A%0ATel%C3%A9fono%3A">Pedir por WhatsApp</a>
       <div class="gnota" id="gnota">Edición corta, hecha por encargo · envío desde España</div>
     </div>
 
@@ -903,7 +908,7 @@
          conversación. El número se enseña escrito además de enlazado, porque en escritorio
          mucha gente no pulsa: lo copia al móvil. -->
     <a class="fwa" target="_blank" rel="noopener"
-       href="https://wa.me/34635393723?text=Hola%20RASH.%20Quiero%20pedir%20la%20gorra%20%E2%80%94%2065%20%E2%82%AC%2C%20talla%20%C3%BAnica.">WhatsApp · +34 635 393 723</a>
+       href="https://wa.me/34635393723?text=Hola%20RASH.">WhatsApp · +34 635 393 723</a>
     <div class="fcopy">© 2026 RASH Group · Todos los derechos reservados</div>
   </footer>
 
