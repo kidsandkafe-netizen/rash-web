@@ -598,6 +598,19 @@
   .ghint2{color:#3b3933}
   @media (max-width:640px){ .ghint2{display:none} }
 
+  /* EL MANDO DE LA LUPA NO SALE EN TACTIL, y no es por ahorrar sitio: es que en el movil
+     sobraba y encima estorbaba.
+       · La pagina YA habia decidido que era de raton. `.ghint2` -- el texto que dice "usa + para
+         ver el bordado" -- se esconde por debajo de 640 px. O sea que en el movil se escondia la
+         EXPLICACION del boton y se dejaba el boton: un mando de 34x92 px, sin etiqueta, encima
+         de la foto, a 12 px del borde derecho de una pantalla de 390. Medido, no a ojo.
+       · Y no se pierde nada, porque el pellizco de dos dedos ya esta implementado y es el gesto
+         que un dedo busca solo. El boton era la version para quien no tiene dos dedos libres:
+         el raton.
+     `hover:none` y no `max-width`: lo que decide no es lo estrecha que sea la pantalla sino si
+     hay puntero fino. Un iPad de 1024 px tambien se pellizca. */
+  @media (hover:none){ .gzoom{display:none} }
+
   .ghint{margin:14px 0 0;text-align:center;pointer-events:none;
     font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:#54514a;
     opacity:0;transition:opacity .5s ease}
@@ -735,6 +748,29 @@
     /* A 390 px de ancho, .34em de interletrado no cabe: se aprieta un punto. */
     .ghint{margin-top:12px;letter-spacing:.24em;font-size:9px}
     .gdial{margin-top:10px}
+
+    /* EL PIE, QUE SE PARTE EN DOS. En el movil la taxonomia ("Sport Horses · Cria — Analisis —
+       Competicion — Atelier — Joyeria") no cabe de una tirada: son 64 caracteres en 342 px
+       utiles, asi que parte si o si. Forzarla a una linea achicando la letra seria cambiar un
+       defecto por otro peor -- letra de 7 px -- y quitarle palabras no me toca a mi.
+       Lo que SI estaba mal era el interlineado: 30 px para dos lineas de 11 px con .34em de
+       interletrado (y 24 px para dos de 9 px en el copyright). Un texto en versales muy
+       espaciadas necesita MAS aire entre lineas, no menos, porque si no las dos lineas se leen
+       como un bloque gris. Se sueltan a 2,1 y el interletrado baja un punto: sigue partiendo en
+       dos, pero ahora parece a proposito. */
+    footer .fline{line-height:2.1;letter-spacing:.26em}
+    footer .fcopy{line-height:2.1;letter-spacing:.22em}
+
+    /* LA AGUJA DE LA VUELTA, que en el movil se leia como una raya suelta. El carril es
+       #14130f -- invisible sobre negro, a proposito, para que sea la aguja y no la barra lo que
+       se ve -- y eso en el escritorio funciona porque la barra vive dentro de su columna y se
+       entiende de donde a donde va. Pero aqui el visor sale a SANGRE, asi que el carril cruzaba
+       los 390 px de pantalla sin verse: quedaba un guion claro de 26 px flotando a la izquierda,
+       sin principio ni final, que parece un fallo de pintado y no una posicion.
+       Dos correcciones minimas: el carril recupera el margen del texto (no va a sangre, la foto
+       si) y se sube lo justo para intuirse. Ya no es una raya suelta: es una aguja en su carril,
+       y ademas alineada con la columna de texto que viene debajo. */
+    .gdial{margin-left:6vw;margin-right:6vw;background:rgba(190,178,158,.10)}
   }
   @media (prefers-reduced-motion:reduce){
     .gfilm,section.gorra .gtxt>*,section.gorra .gvis{transition:none}
