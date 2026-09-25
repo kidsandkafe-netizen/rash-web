@@ -937,7 +937,7 @@
   var stPar=stSec?stSec.querySelector('.stallion-photo .par'):null;   // capa parallax de la foto
   var stText=stSec?stSec.querySelector('.stallion-text'):null;
   var stTouch = (window.matchMedia && matchMedia('(hover:none),(pointer:coarse)').matches);  // en tactil, sin parallax
-  var mx=0,my=0, tmx=0,tmy=0, t0=null, INTRO=2600, sp=0, spT=0, spM=0, spH=0;
+  var mx=0,my=0, tmx=0,tmy=0, t0=null, INTRO=2600, sp=0, spT=0, spH=0;
 
   function ease(x){return 1-Math.pow(1-x,3);}   // easeOutCubic
 
@@ -950,23 +950,25 @@
          spT (aguanta 0.20vh, se funde hasta 0.46vh) = el DESVANECIDO del wordmark. Es fijo con z-index 12,
                         por encima de la seccion, y si dura se superpone encima de la copa y del texto
                         (medido, se ve). Por eso el desvanecido SI espera: que no se vaya antes de tiempo.
-         spM (0 -> 0.46vh) = el VIAJE del wordmark, y va aparte del desvanecido A PROPOSITO.
-                        FALLO QUE ARREGLA: el viaje colgaba del mismo spT, asi que los primeros 20vh de
-                        scroll el RASH no se movia NI UN PIXEL. Y como es `position:fixed`, no moverse ahi
-                        no es quedarse quieto: es quedarse CLAVADO a la pantalla mientras todo lo demas
-                        baja. Se leia como que la pagina se congelaba. Y al llegar a 20vh arrancaba de
-                        golpe a 1,25x la velocidad del scroll (260 px de viaje en 208 px de rueda): primero
-                        congelado y despues un tiron hacia arriba.
-                        Ahora el viaje empieza en el pixel cero y reparte los mismos 260 px a lo largo de
-                        los 46vh = 0,71x la velocidad del scroll. Se mueve desde el primer momento, pero
-                        un poco mas despacio que la pagina, que es el retraso que da profundidad. Y acaba
-                        el viaje justo cuando acaba de desvanecerse: no queda nada colgando.
+         El VIAJE del wordmark va aparte del desvanecido, y va EXACTAMENTE a 1:1 con el scroll
+                        (`-sp*innerHeight` = los mismos pixeles que ha subido la pagina). Dos intentos
+                        fallidos antes de este, y los dos por el mismo motivo de fondo: el wordmark es
+                        `position:fixed`, asi que su velocidad se compara SIEMPRE contra la pagina, y
+                        cualquier numero que no sea 1x se lee como que la pieza se ha soltado.
+                          1) Colgaba de spT: 0x durante 20vh y luego 1,25x. Se veia CONGELADO y despues
+                             un tiron. (Un `fixed` que no se mueve no parece quieto, parece colgado.)
+                          2) 0,71x constante, buscando un retraso de profundidad. Se veia PESADO: el RASH
+                             subia solo, por su cuenta, en vez de irse con la pantalla entera.
+                        A 1:1 no hay deriva relativa contra nada: se comporta igual que si fuera un
+                        elemento normal del documento subiendo con el scroll. Lo unico que lo distingue de
+                        uno normal es que ademas se disuelve, que es lo que queriamos desde el principio.
+                        El que SI hace parallax es el hero (0,11x): es el objeto grande y lejano. El
+                        wordmark esta en el cristal de delante, y ahi el parallax es un defecto.
          spH (0.40->0.82vh) = la LUZ de la cabeza. Aguanta encendida el primer 40vh y muere a 82vh:
                         antes quedaban ~520 px (59% de pantalla) sin nada iluminado entre el hero y
                         la gorra y la pagina parecia acabarse; y si dura mas, el borde opaco de la
                         seccion le corta media cabeza y queda un fantasma. */
     spT = Math.min(Math.max(y - innerHeight*0.20, 0)/(innerHeight*0.26), 1);
-    spM = Math.min(Math.max(y, 0)/(innerHeight*0.46), 1);
     spH = Math.min(Math.max(y - innerHeight*0.40, 0)/(innerHeight*0.42), 1);
     /* Apagar el aviso de scroll en cuanto se ha movido de verdad. 40 px y no 1 px: el rebote
        elástico del móvil y el ancla `#gorra` mueven la página sola, y no hay que castigar eso. */
@@ -1005,9 +1007,9 @@
     }
     // el wordmark RASH tambien se desvanece y sube (gate: al volver arriba, manda el CSS)
     if(title){
-      if(spM>0){ title.style.transition='none';
+      if(sp>0){ title.style.transition='none';
         title.style.opacity=(1-spT).toFixed(3);
-        title.style.transform='translateY('+(-spM*260).toFixed(1)+'px)';
+        title.style.transform='translateY('+(-sp*innerHeight).toFixed(1)+'px)';
       } else { title.style.transition=''; title.style.opacity=''; title.style.transform=''; }
     }
     // el cono de luz de estudio se apaga con el scroll
