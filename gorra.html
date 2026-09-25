@@ -1514,7 +1514,7 @@
      NO gira sola. Nunca. La gorra sólo se mueve mientras hay un dedo encima, y la inercia es
      la prolongación de ese dedo: se apaga sola y se para en seco si la vuelven a tocar. Ese es
      el trato -- lo que se mueve, se mueve porque lo han movido. */
-  var x0=0, base=0, arrastrando=false, vel=0, tUlt=0, xUlt=0, yUlt=0, anim=0;
+  var x0=0, y0=0, base=0, arrastrando=false, eje='x', vel=0, tUlt=0, xUlt=0, yUlt=0, anim=0;
 
   stage.addEventListener('pointerdown', function(e){
     /* Sin las 72 no se gira: cambiar el src por una foto que no ha llegado pinta el hueco en
@@ -1534,13 +1534,39 @@
        que amplían hacia donde se apunta. */
     arrastrando = true;
     cancelAnimationFrame(anim); vel = 0;         // tocar CORTA la inercia, no la acumula
-    x0 = xUlt = e.clientX; yUlt = e.clientY; base = pos; tUlt = performance.now();
+    x0 = xUlt = e.clientX; y0 = yUlt = e.clientY; base = pos; tUlt = performance.now();
+    /* CANDADO DE EJE -- el arreglo del fallo "giro y la gorra se va de la pantalla".
+       El escenario declara `touch-action:pan-y`, o sea que el navegador se reserva el derecho a
+       hacer scroll vertical mientras el dedo esta encima. Eso esta BIEN (sin ello el movil se
+       queda clavado en la gorra y no se puede seguir bajando), pero tenia un agujero: en un
+       arrastre en diagonal las dos cosas pasaban A LA VEZ -- el compositor bajaba la pagina y el
+       guion giraba la gorra -- asi que girabas y el producto se te iba por arriba.
+       El navegador ya elige por el primer tramo del gesto; lo que faltaba era que el GUION
+       eligiera lo mismo. Con el dedo se empieza sin eje: a los 6 px se decide (antes del umbral
+       del propio navegador) y ya no se cambia en todo el gesto. Vertical = es scroll, se suelta
+       el giro y la gorra se queda quieta. Horizontal = es giro, y la pagina no se mueve porque
+       `pan-y` nunca deja hacer scroll lateral.
+       Con raton no hay pelea posible (la rueda es otro gesto) y ampliada tampoco, porque
+       `.gstage.zoom` ya pone `touch-action:none` y a lo alto el dedo pasea la foto: en esos dos
+       casos se entra con el eje ya decidido y no se toca nada. */
+    eje = (e.pointerType === 'touch' && z <= 1.001) ? '' : 'x';
     stage.setPointerCapture(e.pointerId);
     stage.classList.add('tocada','girando');
   });
 
   stage.addEventListener('pointermove', function(e){
     if (!arrastrando) return;
+    if (!eje){
+      var adx = Math.abs(e.clientX - x0), ady = Math.abs(e.clientY - y0);
+      if (adx < 6 && ady < 6) return;            // todavia no es un gesto, es el temblor del dedo
+      if (ady > adx){                            // queria bajar, no girar: se retira el guion
+        arrastrando = false; vel = 0; eje = 'x';
+        stage.classList.remove('girando');
+        try { stage.releasePointerCapture(e.pointerId); } catch (err) {}
+        return;
+      }
+      eje = 'x';
+    }
     /* Arrastrar a la derecha empuja la gorra a la derecha, o sea que la cara que mira al
        visitante se va por ese lado: el índice BAJA, porque la secuencia está grabada girando
        al contrario. Con el signo al revés la gorra parecía tirar del dedo. */
