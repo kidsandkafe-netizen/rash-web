@@ -89,7 +89,11 @@
     background:radial-gradient(closest-side, rgba(186,204,236,.22), rgba(150,170,205,.05) 52%, transparent 76%);
     filter:blur(30px);}
 
-  .grain{position:fixed;inset:-6%;z-index:6;pointer-events:none;opacity:.05;will-change:transform,opacity;
+  /* z-index 14 y no 6: en 6 el grano quedaba POR DEBAJO de la sección de la gorra (que va en 10),
+     así que el producto era lo único de la página sin textura de película -- limpio como un
+     catálogo, justo lo contrario del hero. Subiéndolo, el grano cruza también la gorra. No toca
+     la mezcla del visor: el grano se pinta DESPUÉS, no es telón de nadie. Debajo del menú (30). */
+  .grain{position:fixed;inset:-6%;z-index:14;pointer-events:none;opacity:.05;will-change:transform,opacity;
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     animation:grainFlick .5s steps(2) infinite;}
   @keyframes grainFlick{
@@ -386,6 +390,61 @@
     background:linear-gradient(180deg, rgba(2,2,3,0) 0, rgba(2,2,3,.6) 46px, var(--bg0) 128px);
     display:grid;grid-template-columns:1.3fr .7fr;gap:clamp(30px,4vw,64px);align-items:center}
 
+  /* --- EL AMBIENTE NO SE PUEDE CORTAR -------------------------------------------------------
+     La queja era exacta: arriba hay seis capas de luz (facetas, bruma, baño, aura, cono, grano)
+     y al llegar a la gorra el sitio se vuelve NEGRO PLANO. No era una impresión: esta sección
+     lleva `z-index:10` y un fondo OPACO, o sea que tapa literalmente todas las capas fijas del
+     hero (facetas y bg en 0, bruma en 2, baño en 3, cabeza en 5, grano en 6). Un telón.
+
+     Lo obvio sería quitarle el fondo y dejar que se vea lo de detrás. NO SE PUEDE, y la razón
+     es la misma que sostiene todo el visor: la gorra se pega con `mix-blend-mode:screen` para
+     que el negro del recorte se vuelva transparente, y mezclar exige un FONDO DETRÁS. Con la
+     sección transparente el grupo de mezcla se queda sin telón, el `screen` no tiene con qué
+     operar y vuelve a dibujarse el rectángulo negro de la foto -- el defecto que costó arreglar.
+
+     Así que el ambiente no se destapa: se TRAE DENTRO. La sección se queda opaca (el `screen`
+     sigue teniendo su fondo) y encima de ese fondo, por debajo de la gorra, se pintan las
+     mismas capas del hero. Mismo idioma, misma paleta, sin romper la mezcla. */
+  /* La máscara de arriba NO es cosmética, tapa una costura medida. Sin ella, el ambiente de la
+     sección empieza en seco justo en su canto superior: midiendo el brillo del pantallazo fila a
+     fila por el centro, la cuesta sube suave (29 -> 48 niveles) y de una fila a la siguiente
+     PEGA UN SALTO de +9 niveles. Nueve niveles de golpe sobre negro es una raya horizontal
+     visible de lado a lado de la pantalla, y cae exactamente en el píxel donde empieza la
+     sección -- o sea que se leía como "aquí se acaba una página y empieza otra", que es
+     literalmente la queja. Desvaneciendo el ambiente propio en el primer 20% (y en el último,
+     por el mismo motivo contra el pie), el relevo entre la luz del hero y la de aquí deja de
+     tener canto: donde una se apaga la otra ya está encendida. */
+  .gatmo{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;
+    -webkit-mask-image:linear-gradient(180deg, transparent 0, #000 20%, #000 88%, transparent 100%);
+            mask-image:linear-gradient(180deg, transparent 0, #000 20%, #000 88%, transparent 100%);}
+
+  /* Las facetas del logo, que es la textura de la casa. La imagen se clona del hero por guion
+     (son ~100 KB en base64: duplicarlas en el CSS sería duplicar el peso de la página). */
+  .gatmo .gfacets{position:absolute;inset:-10%;background-size:cover;background-position:center;
+    opacity:0;transition:opacity 2.4s ease;
+    /* La máscara va AL REVÉS que la del hero. Allí las facetas son el asunto y se concentran en el
+     centro; aquí el asunto es la gorra, y una faceta grande justo detrás del producto compite
+     con él -- se veía el canto de un polígono cruzando la visera. Así que el centro se vacía
+     (`transparent 0 34%`) y la textura vive en los bordes, cerrando la sala. Y a .22, no .34:
+     por encima de eso deja de ser pared y se convierte en dibujo. */
+    -webkit-mask-image:radial-gradient(86% 76% at 50% 46%, transparent 0 34%, rgba(0,0,0,.55) 62%, #000 88%);
+            mask-image:radial-gradient(86% 76% at 50% 46%, transparent 0 34%, rgba(0,0,0,.55) 62%, #000 88%);}
+  section.gorra.in .gatmo .gfacets{opacity:.22}
+
+  /* El baño de luz frío del hero, servido aquí desde ARRIBA: luz de techo de taller. Es la que
+     da la sensación de sitio -- sin ella las facetas solas se leen como ruido. */
+  .gatmo .gwash{position:absolute;inset:0;mix-blend-mode:screen;opacity:0;
+    transition:opacity 2.8s ease .2s;
+    background:
+      radial-gradient(64% 46% at 50% 16%, rgba(196,212,244,.13), transparent 72%),
+      radial-gradient(90% 70% at 50% 40%, rgba(120,140,180,.055), transparent 76%);}
+  section.gorra.in .gatmo .gwash{opacity:1}
+
+  /* Y el cierre de siempre: viñeta. Sin ella la luz de arriba llega a los cantos y la sección
+     se abre como una web normal; con ella el borde se cierra y queda escaparate. */
+  .gatmo .gvig{position:absolute;inset:0;
+    background:radial-gradient(118% 92% at 50% 42%, transparent 40%, rgba(0,0,0,.55) 74%, rgba(0,0,0,.92) 94%, #000 100%);}
+
   /* SIN marco y SIN caja. Antes había un borde `1px solid #14130f` y un fondo `#000` propio:
      sobre el negro de la página eso dibujaba un rectángulo gris alrededor del producto, que es
      justo el gesto que separa una ficha de tienda de un escaparate. La gorra tiene que FLOTAR
@@ -393,6 +452,32 @@
      `touch-action:pan-y` deja arrastrar en horizontal SIN secuestrar el scroll vertical --
      el navegador decide por el primer gesto, así que girar y bajar no se pelean. Sin esto,
      en el móvil la página se queda clavada al intentar girar la gorra. */
+  /* EL HALO, y por qué está HUECO justo en el medio.
+     La gorra se pega con `screen`, que suma: 1-(1-a)(1-b). Donde la foto es negro puro el
+     resultado es EXACTAMENTE el fondo -- por eso el recorte desaparece -- pero el paño de la
+     gorra no es negro puro, es lana negra, y la lana también suma. Un resplandor bonito puesto
+     DETRÁS del producto se le mete dentro: la lana subiría de 0,03 a 0,11 y la gorra se vería
+     translúcida, como un fantasma. Sería cambiar un defecto por otro peor.
+     Así que la luz no se pone detrás: se pone ALREDEDOR. El centro se deja transparente (la
+     lana sigue siendo lana) y el anillo cae sobre el aire recortado, que sí es negro puro y sí
+     deja pasar el fondo entero. Resultado: la gorra queda recortada CONTRA la luz, que es como
+     se ilumina una pieza en un escaparate, en vez de flotar sobre un agujero negro. */
+  .gvis{position:relative}
+  /* `blur(60px)` y no 14: a 14 px el anillo se LEÍA como anillo -- un cerco marrón con su borde,
+     medido a ojo en captura, que parecía suciedad en el cristal y no luz. Difuminado a 60 px el
+     degradado pierde todo canto y lo que queda es un resplandor sin forma, que es lo que hace
+     una luz de verdad rebotando en una pared. El oro además baja a .085: sobre negro cualquier
+     cosa por encima de .10 ya no es atmósfera, es color. */
+  .gvis::before{content:'';position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);
+    width:112%;height:138%;pointer-events:none;z-index:0;filter:blur(60px);
+    opacity:0;transition:opacity 2.2s ease .3s;
+    background:
+      radial-gradient(ellipse 60% 76% at 50% 50%,
+        transparent 0 46%, rgba(233,198,122,.085) 64%, rgba(198,158,74,.03) 78%, transparent 92%),
+      radial-gradient(ellipse 84% 98% at 50% 50%,
+        transparent 0 56%, rgba(150,170,205,.06) 74%, transparent 94%);}
+  section.gorra.in .gvis::before{opacity:1}
+
   .gstage{position:relative;cursor:grab;touch-action:pan-y;
     user-select:none;-webkit-user-select:none}
   .gstage.girando{cursor:grabbing}
@@ -634,6 +719,15 @@
        viejo es la diferencia entre girar y no ver nada. -->
   <section class="gorra" id="gorra">
 
+    <!-- El ambiente del hero, traído dentro de la sección (ver `.gatmo` en el CSS). Va primero
+         en el marcado a propósito: se pinta por DEBAJO de la gorra, que es lo que necesita la
+         mezcla `screen` para tener telón. -->
+    <div class="gatmo" aria-hidden="true">
+      <div class="gfacets" id="gfacets"></div>
+      <div class="gwash"></div>
+      <div class="gvig"></div>
+    </div>
+
     <div class="gvis">
       <div class="gstage" id="gstage" tabindex="0" role="img"
            aria-label="Gorra negra de seis paneles con la cabeza RASH bordada en hilo plata. Arrastra en horizontal para girarla.">
@@ -731,6 +825,12 @@
 (function(){
   var hero=document.getElementById('hero');
   var facets=document.querySelector('.facets');
+  /* La misma textura de facetas, prestada a la sección de la gorra. Se copia la referencia a la
+     imagen (que ya está descargada y decodificada: es la misma URL, el navegador no vuelve a
+     pedirla) en vez de repetir los ~100 KB de base64 en el CSS. Si algún día cambia la textura
+     del hero, ésta cambia con ella sola. */
+  var gfacets=document.getElementById('gfacets');
+  if(facets && gfacets) gfacets.style.backgroundImage = facets.style.backgroundImage;
   var haze=document.querySelector('.haze');
   var title=document.querySelector('.heroTitle');
   var shaft=document.querySelector('.shaft');
