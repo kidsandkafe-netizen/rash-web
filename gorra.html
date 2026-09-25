@@ -8,7 +8,11 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Manrope:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-  :root{--ink:#ece7dd;--gold:#c69e4a;--goldh:#e6c477;--soft:#8b877f;--bg0:#020203;}
+    /* EL ACENTO YA NO ES ORO, ES PLATINO. El logo y el bordado de la gorra son PLATA: un
+     dorado al lado obliga al ojo a mirar dos metales a la vez y ninguno gana. Con un solo
+     metal, el acento no compite con el producto -- lo repite. Los nombres de las variables
+     se quedan (`--gold`) para no tocar los treinta sitios que las usan. */
+  :root{--ink:#ece7dd;--gold:#a9b0b8;--goldh:#e7ebef;--soft:#878d95;--bg0:#020203;}
   *{margin:0;padding:0;box-sizing:border-box}
   html{scroll-behavior:smooth}
   body{background:var(--bg0);color:var(--ink);font-family:'Manrope',sans-serif;overflow-x:hidden;
@@ -112,7 +116,7 @@
     width:54vh;height:54vh;border-radius:50%;pointer-events:none;z-index:-1;
     mix-blend-mode:screen;opacity:0;filter:blur(10px);
     background:radial-gradient(closest-side,
-      rgba(233,198,122,.22), rgba(198,158,74,.09) 44%, transparent 72%);}
+      rgba(224,232,240,.22), rgba(158,170,184,.09) 44%, transparent 72%);}
   body.go #heroWrap .aura{animation:auraIn 5s ease-out both, auraBreath 9s ease-in-out infinite 5s;}
   @keyframes auraIn{
     0%,42%{opacity:0;transform:translate(-50%,-50%) scale(.62)}
@@ -167,7 +171,7 @@
     -webkit-mask-size:contain;mask-size:contain;
     -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
     -webkit-mask-position:center;mask-position:center;
-    background:linear-gradient(100deg,#6f6b62 12%,#cfcabf 34%,#ffffff 46%,#e6c477 55%,#a89a7c 70%,#6f6b62 92%);
+    background:linear-gradient(100deg,#6b7078 12%,#cfcabf 34%,#ffffff 46%,#e7ebef 55%,#9aa3ad 70%,#6b7078 92%);
     background-size:230% auto;
     animation:shine 10s linear infinite 1.8s, wmglow 6s ease-in-out infinite 2s;
     filter:drop-shadow(0 4px 14px rgba(0,0,0,.45));}
@@ -175,7 +179,7 @@
   /* efecto premium: halo champan que respira suave alrededor de las letras */
   @keyframes wmglow{
     0%,100%{filter:drop-shadow(0 4px 14px rgba(0,0,0,.45)) drop-shadow(0 0 10px rgba(230,196,119,.18));}
-    50%    {filter:drop-shadow(0 5px 15px rgba(0,0,0,.45)) drop-shadow(0 0 20px rgba(233,198,122,.42));}}
+    50%    {filter:drop-shadow(0 5px 15px rgba(0,0,0,.45)) drop-shadow(0 0 20px rgba(224,232,240,.42));}}
   .heroSub{position:fixed;left:0;right:0;bottom:9.4vh;z-index:12;text-align:center;
     font-size:10px;letter-spacing:.5em;text-transform:uppercase;color:var(--soft);
     opacity:0;transition:opacity 1.4s ease 2.3s}
@@ -245,7 +249,7 @@
   /* filete dorado centrado que separa apartados (elegante, no linea plana) */
   section.block+section.block::before, footer::before{content:"";position:absolute;top:0;left:50%;
     transform:translateX(-50%);width:min(58%,500px);height:1px;
-    background:linear-gradient(90deg,transparent,rgba(198,158,74,.32),transparent)}
+    background:linear-gradient(90deg,transparent,rgba(158,170,184,.32),transparent)}
   /* primer apartado: se funde con el hero (transparente arriba -> negro) sin corte */
   section.block#cria{background:linear-gradient(180deg, rgba(2,2,3,0) 0%, rgba(2,2,3,.55) 16%, var(--bg0) 34%);padding-top:19vh}
   section.block .eyebrow{font-size:11px;letter-spacing:.4em;text-transform:uppercase;color:var(--gold);margin-bottom:18px}
@@ -262,16 +266,16 @@
   footer{position:relative;z-index:10;text-align:center;padding:13vh 24px 8vh;background:var(--bg0)}
   footer .fmark{font-family:'Cormorant Garamond',serif;font-weight:500;
     font-size:clamp(34px,6vw,62px);letter-spacing:.42em;padding-left:.42em;margin-bottom:22px;
-    background:linear-gradient(100deg,#7d7970 14%,#e8e2d6 44%,#e6c477 60%,#8a8069 88%);
+    background:linear-gradient(100deg,#7d7970 14%,#e8e2d6 44%,#e7ebef 60%,#8d949c 88%);
     -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;
-    filter:drop-shadow(0 0 18px rgba(233,198,122,.14));}
+    filter:drop-shadow(0 0 18px rgba(224,232,240,.14));}
   footer .fline{font-size:11px;letter-spacing:.34em;text-transform:uppercase;color:var(--soft);margin-bottom:30px}
   /* En oro, no en gris: es el único dato accionable del pie y tiene que leerse como tal.
      Subrayado sólo al pasar por encima -- un subrayado fijo aquí abarata la firma. */
   footer .fwa{display:inline-block;margin-bottom:30px;text-decoration:none;
     font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--goldh);
     border-bottom:1px solid transparent;padding-bottom:5px;transition:border-color .45s ease}
-  footer .fwa:hover,footer .fwa:focus-visible{border-bottom-color:rgba(198,158,74,.55)}
+  footer .fwa:hover,footer .fwa:focus-visible{border-bottom-color:rgba(158,170,184,.55)}
   footer .fcopy{font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:rgba(139,135,127,.5)}
 
   /* ==== SEMENTALES · UMBRILLIO (cinematografica) ==== */
@@ -280,7 +284,7 @@
     gap:2vw;padding:12vh 7vw;overflow:hidden}
   section.stallion::before{content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);
     width:min(58%,500px);height:1px;
-    background:linear-gradient(90deg,transparent,rgba(198,158,74,.32),transparent)}
+    background:linear-gradient(90deg,transparent,rgba(158,170,184,.32),transparent)}
   /* SPOT cinematografico ceñido a cabeza/cuello/pecho (normal blend = identico a 'screen' sobre negro puro, y Safari no lo rompe) */
   section.stallion .key{position:absolute;inset:0;z-index:0;pointer-events:none;mix-blend-mode:normal;
     background:radial-gradient(30% 44% at 27% 45%, rgba(232,210,168,.18), rgba(196,158,74,.05) 46%, transparent 66%)}
@@ -386,7 +390,7 @@
      se vende, así que se lleva la parte del león (1.3 contra .7) y el margen lateral baja de
      7vw a 5vw. Medido a 1710 px de ventana, el visor pasa de 804 a ~990 px -- la gorra se ve
      un 23 % más grande sin que la ficha baje de las 44 columnas de texto cómodo. */
-  section.gorra{position:relative;z-index:10;padding:19vh 5vw 13vh;
+  section.gorra{position:relative;z-index:10;padding:max(150px,17vh) 5vw 13vh;
     background:linear-gradient(180deg, rgba(2,2,3,0) 0, rgba(2,2,3,.6) 46px, var(--bg0) 128px);
     display:grid;grid-template-columns:1.3fr .7fr;gap:clamp(30px,4vw,64px);align-items:center}
 
@@ -473,15 +477,17 @@
     opacity:0;transition:opacity 2.2s ease .3s;
     background:
       radial-gradient(ellipse 60% 76% at 50% 50%,
-        transparent 0 46%, rgba(233,198,122,.085) 64%, rgba(198,158,74,.03) 78%, transparent 92%),
+        transparent 0 46%, rgba(224,232,240,.085) 64%, rgba(158,170,184,.03) 78%, transparent 92%),
       radial-gradient(ellipse 84% 98% at 50% 50%,
         transparent 0 56%, rgba(150,170,205,.06) 74%, transparent 94%);}
-  section.gorra.in .gvis::before{opacity:1}
+  /* El halo deja de ser un interruptor y pasa a ser un DIMMER: el guion escribe `--halo`
+     segun lo cerca que este la gorra, asi la luz se enciende CON ella. */
+  section.gorra.in .gvis::before{opacity:var(--halo,1)}
 
   .gstage{position:relative;cursor:grab;touch-action:pan-y;
     user-select:none;-webkit-user-select:none}
   .gstage.girando{cursor:grabbing}
-  .gstage:focus-visible{outline:1px solid #6b5426;outline-offset:3px}
+  .gstage:focus-visible{outline:1px solid #3f4750;outline-offset:3px}
 
   /* El charco de luz. Un objeto recortado contra negro puro no se apoya en nada, y el ojo lo
      lee como un pegote, no como una foto. Sobre negro no se puede echar una sombra -- no hay
@@ -489,7 +495,7 @@
      oro de la marca. No inventa producto, sólo le pone suelo. Entra con la foto, no antes. */
   .gstage::before{content:'';position:absolute;left:50%;bottom:6%;transform:translateX(-50%);
     width:46%;height:9%;border-radius:50%;pointer-events:none;z-index:0;
-    background:radial-gradient(ellipse at center, rgba(198,158,74,.13) 0%, rgba(198,158,74,0) 70%);
+    background:radial-gradient(ellipse at center, rgba(158,170,184,.13) 0%, rgba(158,170,184,0) 70%);
     opacity:0;transition:opacity 1.4s ease}
   .gstage.frente::before{opacity:1}
 
@@ -569,9 +575,9 @@
     font:400 17px/1 'Jost',system-ui,sans-serif;
     -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
     transition:color .25s ease,border-color .25s ease}
-  .gzoom button:hover{color:var(--goldh);border-color:#4a3a1c}
+  .gzoom button:hover{color:var(--goldh);border-color:#2f363e}
   .gzoom button:disabled{opacity:.28;cursor:default}
-  .gzoom button:focus-visible{outline:1px solid #6b5426;outline-offset:2px}
+  .gzoom button:focus-visible{outline:1px solid #3f4750;outline-offset:2px}
   .gzoom span{font-size:9px;letter-spacing:.2em;color:#54514a;min-width:22px;text-align:center}
   /* AMPLIADA, EL VERTICAL ES DE LA GORRA -- y conviene dejar escrito el vaivén de esta línea,
      porque ha ido y ha vuelto y no por capricho.
@@ -603,7 +609,7 @@
 
   /* Las 72 fotos tardan, y sin señal la caja negra parece rota. Se va sola al terminar. */
   .gcarga{position:absolute;left:0;bottom:0;height:1px;width:0;
-    background:linear-gradient(90deg,#6b5426,#e6c477);transition:width .25s ease,opacity .6s ease}
+    background:linear-gradient(90deg,#3f4750,#e7ebef);transition:width .25s ease,opacity .6s ease}
   .gstage.lista .gcarga{opacity:0}
 
   /* Dónde está la gorra dentro de la vuelta: la única pieza que se mueve, y se mueve porque
@@ -614,6 +620,39 @@
 
   section.gorra .eyebrow{font-size:11px;letter-spacing:.4em;text-transform:uppercase;
     color:var(--gold);margin-bottom:18px}
+
+  /* ====== PORTADA DE LA PIEZA (private release) ==========================================
+     Ocupa las DOS columnas: es el titulo de todo el acto, no de una de las mitades. */
+  .ghead{grid-column:1/-1;text-align:center;margin-bottom:clamp(16px,3.4vh,44px)}
+  /* La cejilla entre dos filetes. El `text-indent` no es un capricho: `letter-spacing` anade
+     el hueco TAMBIEN despues de la ultima letra, asi que un texto espaciado centrado queda
+     siempre medio hueco a la izquierda. Empujandolo ese mismo hueco vuelve a estar centrado
+     de verdad -- a .52em se notaba (4,5 px de desvio). */
+  .grel{display:flex;align-items:center;justify-content:center;gap:clamp(12px,2vw,20px)}
+  .grel i{display:block;height:1px;width:clamp(22px,5vw,58px);
+    background:linear-gradient(90deg,transparent,#333a42)}
+  .grel i:last-child{background:linear-gradient(90deg,#333a42,transparent)}
+  .grel span{font-size:10px;letter-spacing:.52em;text-indent:.52em;text-transform:uppercase;
+    color:var(--gold)}
+  /* ORO DE VERDAD = degradado, no un color plano. Un dorado plano sobre negro se lee como
+     amarillo mostaza; el oro se reconoce porque tiene canto claro arriba y sombra abajo. Se
+     pinta el degradado y se recorta con la propia letra (`background-clip:text`). */
+  .ghead h2{font-family:'Cormorant Garamond',serif;font-weight:400;
+    font-size:clamp(36px,6.4vw,80px);line-height:1.02;letter-spacing:.005em;
+    margin:clamp(14px,2.2vh,26px) 0 0;
+    color:var(--goldh);
+    background-image:linear-gradient(180deg,#ffffff 0%,#e3e9ef 28%,#aab3bd 62%,#6b747e 100%);
+    -webkit-background-clip:text;background-clip:text;
+    -webkit-text-fill-color:transparent}
+  .ghead h2 em{font-style:normal;color:inherit}
+  /* El filete se DIBUJA solo al entrar (0 -> ancho). Es el unico movimiento de la portada:
+     el resto solo se materializa. */
+  .grule{height:1px;width:0;margin:clamp(16px,2.4vh,28px) auto 0;
+    background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+  /* El numero de edicion va DEBAJO del filete y en gris, no en metal: es un dato, no un
+     titulo. Puesto arriba con la cejilla competian dos lineas espaciadas por el mismo sitio. */
+  .gedic{margin-top:clamp(12px,1.8vh,18px);font-size:10px;letter-spacing:.36em;
+    text-indent:.36em;text-transform:uppercase;color:#6b7078}
   section.gorra h2{font-family:'Cormorant Garamond',serif;font-weight:400;
     font-size:clamp(28px,4.2vw,50px);line-height:1.06;margin-bottom:16px}
   section.gorra h2 em{font-style:normal;color:var(--goldh)}
@@ -624,13 +663,13 @@
     display:grid;grid-template-columns:1fr 1fr;gap:0 28px}
   .gspecs li{padding:12px 0;border-top:1px solid #14130f}
   .gspecs b{display:block;font-weight:400;font-size:10px;letter-spacing:.3em;
-    text-transform:uppercase;color:#6f6b62;margin-bottom:5px}
+    text-transform:uppercase;color:#6b7078;margin-bottom:5px}
   .gspecs span{font-family:'Cormorant Garamond',serif;font-size:19px;color:var(--ink)}
 
   .gprecio{font-family:'Cormorant Garamond',serif;font-size:30px;color:var(--ink);
     margin-bottom:22px}
   .gprecio small{font-family:'Manrope',sans-serif;font-size:11px;letter-spacing:.24em;
-    text-transform:uppercase;color:#6f6b62;margin-left:10px}
+    text-transform:uppercase;color:#6b7078;margin-left:10px}
 
   /* El botón es la única superficie que se llena de color en toda la página: aquí sí debe
      pesar, porque es lo único que se puede hacer. */
@@ -644,9 +683,21 @@
   /* La entrada escalonada la dispara el MISMO IntersectionObserver que usaban los mundos de
      la portada (añade `.in` al entrar en pantalla). Por eso no hay guion de aparición: se
      añadió `section.gorra` a su lista y ya está. */
-  section.gorra .gtxt>*,section.gorra .gvis{
+  /* La portada entra ANTES que nada: se anuncia la pieza y despues aparece. */
+  section.gorra .ghead>*{opacity:0;transform:translateY(14px);
+    transition:opacity 1.2s ease,transform 1.2s cubic-bezier(.16,.7,.2,1),
+               width 1.8s cubic-bezier(.16,.7,.2,1)}
+  section.gorra.in .ghead>*{opacity:1;transform:none}
+  section.gorra.in .ghead>*:nth-child(1){transition-delay:.05s}
+  section.gorra.in .ghead>*:nth-child(2){transition-delay:.22s}
+  section.gorra.in .ghead>*:nth-child(3){transition-delay:.44s}
+  section.gorra.in .ghead>*:nth-child(4){transition-delay:.62s}
+  section.gorra.in .grule{width:min(230px,42vw)}
+
+  section.gorra .gtxt>*{
     opacity:0;transform:translateY(16px);transition:opacity .9s ease,transform .9s ease}
-  section.gorra.in .gvis{opacity:1;transform:none}
+  /* `.gvis` YA NO se funde con CSS: la trae el scroll (ver el guion). Y sobre todo no lleva
+     `opacity` ni `transform` propios, que es lo que le devolvia el marco negro a la foto. */
   section.gorra.in .gtxt>*{opacity:1;transform:none}
   section.gorra.in .gtxt>*:nth-child(1){transition-delay:.10s}
   section.gorra.in .gtxt>*:nth-child(2){transition-delay:.22s}
@@ -659,7 +710,7 @@
   @media (max-width:900px){
     /* 18vh y no 15vh arriba: el degradado de cosido acaba a los 128 px, y a 15vh el visor
        empezaba en el 127 -- justo en el canto. Con 18vh la gorra pisa negro sólido siempre. */
-    section.gorra{grid-template-columns:1fr;padding:18vh 6vw 11vh;gap:34px}
+    section.gorra{grid-template-columns:1fr;padding:max(150px,16vh) 6vw 11vh;gap:34px}
     /* En una columna el visor ya ocupa todo el ancho: la altura la manda la proporción de los
        cuadros, no un `min(46vh,380px)` que volvía a meter bandas negras. */
 
@@ -743,6 +794,17 @@
       <div class="gvig"></div>
     </div>
 
+    <!-- EL TITULO VA EN MEDIO, no en la columna del texto. Una pieza de edicion se presenta
+         como una portada: se anuncia primero (nombre, centrado, en oro) y solo despues se
+         ensena. En la columna de la derecha el nombre competia con la ficha tecnica y la
+         gorra entraba sin que nadie la hubiera presentado. -->
+    <header class="ghead">
+      <div class="grel"><i></i><span>Private Release</span><i></i></div>
+      <h2>La gorra <em>RASH</em></h2>
+      <div class="grule" aria-hidden="true"></div>
+      <div class="gedic">Edición 01 · 2026</div>
+    </header>
+
     <div class="gvis">
       <div class="gstage" id="gstage" tabindex="0" role="img"
            aria-label="Gorra negra de seis paneles con la cabeza RASH bordada en hilo plata. Arrastra en horizontal para girarla.">
@@ -789,8 +851,6 @@
     </div>
 
     <div class="gtxt">
-      <div class="eyebrow">Atelier · Edición</div>
-      <h2>La gorra <em>RASH</em></h2>
       <p>Seis paneles de sarga de lana, costura de aguja doble y la cabeza facetada bordada
          en hilo plata. Visera plana con seis pespuntes y cierre trasero regulable.
          Gírala con el dedo.</p>
@@ -850,6 +910,10 @@
   var title=document.querySelector('.heroTitle');
   var shaft=document.querySelector('.shaft');
   var loader=document.getElementById('loader');
+  var gSec=document.getElementById('gorra');
+  var gVis=gSec?gSec.querySelector('.gvis'):null;
+  var gFilm=document.getElementById('gfilm');
+  var gStage=document.getElementById('gstage');
   var stSec=document.getElementById('competicion');
   var stPhoto=stSec?stSec.querySelector('.stallion-photo'):null;
   var stKey=stSec?stSec.querySelector('.key'):null;
@@ -944,6 +1008,49 @@
         stPar.style.transform='translate('+(mx*14).toFixed(1)+'px,'+(my*9).toFixed(1)+'px)';
         if(stText) stText.style.transform='translate('+(mx*-9).toFixed(1)+'px,'+(my*-6).toFixed(1)+'px)';
       }
+    }
+
+    /* ====== LA GORRA SE MATERIALIZA (no "entra") ==========================================
+       Antes aparecia con una transicion de CSS de .9 s: un objeto que sube 16 px y ya esta.
+       Ahora la trae el propio scroll y llega DESENFOCADA, como algo que estaba al fondo del
+       cuarto y se acerca a la luz: el desenfoque se va, la opacidad florece tarde (^1.7, asi
+       que la primera mitad del recorrido casi no se ve) y el halo sube con ella.
+
+       Dos cuidados que NO son opcionales:
+       · NUNCA `scale` aqui. La lupa convierte el dedo a coordenadas de la caja con
+         `clip.getBoundingClientRect()`; una escala en un ancestro cambia ese rectangulo y el
+         zoom se iria del punto que miras. `translateY` es inocuo (desplaza rect y raton por
+         igual), por eso la subida es solo vertical.
+       · El `blur` va en `#gfilm`, que YA lleva `mix-blend-mode:screen`. En cualquier ancestro
+         (`.gvis`) un `filter` crea contexto de apilado y el `screen` dejaria de alcanzar la
+         pagina: reaparecerian los 1260x630 de negro del recorte como un rectangulo. En el
+         mismo elemento se aplica antes de mezclar, y no rompe nada. */
+    if(gVis && gSec && gFilm){
+      /* El recorrido se mide sobre LA GORRA, no sobre la seccion. En vertical la seccion mide
+         1120 px contra 717 de pantalla: su centro llega tardisimo, y la gorra se quedaba en
+         pantalla desenfocada media pagina. Con el rectangulo del propio producto la cuenta
+         vale igual en horizontal y en vertical. */
+      var rgv=gVis.getBoundingClientRect(), vhg=innerHeight||1;
+      var cgv=rgv.top + rgv.height*0.50;
+      var pgv=(vhg*1.02 - cgv)/(vhg*0.60);
+      pgv = pgv<0?0:(pgv>1?1:pgv);
+      var egv=pgv*pgv*(3-2*pgv);                  // smoothstep
+      var bgv=Math.pow(egv,1.7);                  // bloom tardio: la primera mitad casi no se ve
+      /* La opacidad y el desenfoque van en `#gfilm`, que es el elemento que YA lleva
+         `mix-blend-mode:screen`, NUNCA en `.gvis`. En el propio elemento mezclado, opacidad y
+         filtro se aplican sin romper nada. En un ANCESTRO cualquiera de los dos -- y tambien
+         un `transform`, aunque sea `translateY(0px)` -- crea contexto de apilado, el `screen`
+         se queda encerrado dentro y vuelven a verse los 1260x630 de negro del recorte como un
+         rectangulo gris. Medido en pantalla: con `transform` en `.gvis` el marco reaparecia. */
+      if(gStage && gStage.classList.contains('frente')){
+        gFilm.style.transition='none';
+        gFilm.style.opacity=bgv.toFixed(3);
+      }
+      gFilm.style.filter = egv>=0.999 ? '' : 'blur('+((1-egv)*13).toFixed(2)+'px)';
+      /* La subida se hace con `top` y no con `transform` por lo mismo de arriba: `.gvis` es
+         `position:relative` sin `z-index`, asi que moverla con `top` no crea contexto. */
+      gVis.style.top = egv>=0.999 ? '' : ((1-egv)*56).toFixed(1)+'px';
+      gVis.style.setProperty('--halo', bgv.toFixed(3));
     }
     requestAnimationFrame(frame);
   }
