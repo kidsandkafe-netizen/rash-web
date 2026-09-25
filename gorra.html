@@ -573,13 +573,15 @@
   .gzoom button:disabled{opacity:.28;cursor:default}
   .gzoom button:focus-visible{outline:1px solid #6b5426;outline-offset:2px}
   .gzoom span{font-size:9px;letter-spacing:.2em;color:#54514a;min-width:22px;text-align:center}
-  /* Ampliada, el cursor deja de prometer que se arrastra la página y promete la gorra. */
-  /* Ampliada el dedo pasa a MOVER la foto, así que hace falta también el vertical. Con el
-     `pan-y` de siempre, arrastrar hacia arriba se lo quedaba el navegador para bajar la página y
-     la foto no subía: parecía que el zoom estaba clavado. A escala 1 vuelve el `pan-y`, que es lo
-     que deja bajar la página con el dedo encima de la gorra. */
-  .gstage.zoom{cursor:grab;touch-action:none}
-  .gstage.zoom.movida{cursor:grabbing}
+  /* ⚠️ AQUÍ HABÍA UN `touch-action:none` mientras estaba ampliada, y era la tercera pata del
+     mismo fallo. Se puso porque ampliada el dedo MOVÍA la foto y para moverla en vertical hay
+     que quitarle el gesto al navegador. Pero `none` significa "no te dejo hacer NADA con el
+     dedo aquí": ampliada, la página ya no bajaba con el dedo encima de la gorra. Junto con que
+     el dedo tampoco giraba, lo que quedaba era una gorra que al ampliarla no respondía a nada
+     -- congelada, dicho tal cual.
+     Ampliada ya sólo se gira, igual que de lejos, así que no hay nada que añadir: vale el
+     `pan-y` que trae `.gstage`, que cede el horizontal (girar) y devuelve el vertical (bajar la
+     página). Y el `grabbing` lo pone `.girando`, que ahora entra esté ampliada o no. */
 
   .ghint2{color:#3b3933}
   @media (max-width:640px){ .ghint2{display:none} }
@@ -1102,6 +1104,9 @@
      golpe en un fotograma. */
 
   /* --- por qué el fundido NO puede ser a pelo: el BORDADO DOBLE -------------------------------
+     ⚠️ HISTÓRICO. Esto explica un mecanismo que YA NO ESTÁ (se quitó el 2026-09-25, ver el
+     aviso que hay justo debajo). Se deja porque explica de dónde venía y por qué dejó de
+     hacer falta; lo que NO hay que hacer es volver a montarlo sin leer el aviso.
      Mezclar los dos cuadros tal cual tenía un defecto que se veía a la primera, y en lo peor: el
      logo. Entre dos fotos vecinas la gorra no se mueve un poco, se mueve MUCHO -- medido por
      correlación sobre la copa, 17,5 px de media y hasta 36 px por delante, sobre 1640 (el ancho que
@@ -1127,27 +1132,34 @@
      lado; el +0,488 del 28 es el único positivo y es donde la gorra está de perfil y hay poca
      textura a la que agarrarse -- vale medio punto porcentual, no se nota, y se deja MEDIDO en
      vez de maquillado. */
-  /* TABLA NUEVA, vuelta a medir sobre los cuadros RECENTRADOS (`_cap3d/publica.py`).
-     Había que rehacerla: la vieja medía dos cosas sumadas -- la rotación de verdad Y el
-     bailoteo de la mano que giraba la gorra -- y ese bailoteo ya no existe, se quitó en el
-     archivo. Se nota en la forma de los números: la tabla vieja iba a saltos (-1,95 seguido
-     de -0,91) porque el temblor entraba y salía; ésta sube y baja en una curva limpia, casi
-     plana en el 0 y en el 35 (gorra de frente y de espaldas, donde el giro casi no corre por
-     la pantalla) y máxima entre el 46 y el 64 (de perfil, donde más corre). Eso es rotación
-     sola, que es justo lo que debe compensar el corrimiento.
-     Comprobado que no se sale del lienzo: en el peor de los 72, contando el corrimiento
-     entero, sobran 19 px hasta el canto. */
-  var DESPL = [
-     -0.238,  -0.952,  -0.556,  -0.714,  -0.873,  -0.317,  -1.349,  -1.190,
-     -1.032,  -1.270,  -1.111,  -1.270,  -1.349,  -1.429,  -1.587,   0.079,
-      0.476,  -0.873,  -1.587,  -1.587,  -1.905,  -1.667,  -1.429,  -1.349,
-     -1.667,  -1.190,  -1.190,  -1.270,   0.159,  -1.270,  -0.873,  -0.079,
-     -0.556,  -0.397,  -0.079,  -0.079,  -0.238,  -0.476,  -0.635,  -1.032,
-     -1.429,  -1.508,  -1.508,  -1.349,  -2.143,  -1.825,  -2.778,  -2.937,
-     -3.095,  -2.778,  -2.222,  -2.619,  -2.778,  -2.063,  -2.063,  -2.143,
-     -2.698,  -2.698,  -2.222,  -3.016,  -2.778,  -2.937,  -3.254,  -1.667,
-     -3.175,  -2.302,  -1.349,  -0.476,  -0.238,   0.079,  -0.079,   0.238
-  ];
+  /* ⚠️ EL CORRIMIENTO SE QUITÓ -- 2026-09-25, y conviene entender por qué, porque todo lo que
+     hay escrito ahí arriba era CIERTO y dejó de serlo el día que se recentraron las fotos.
+
+     Todo aquello existía para tapar UNA cosa: que la gorra no estaba clavada. Quien la giró era
+     una mano, no un torno, y el centro de la gorra se paseaba 284 px de un extremo al otro de
+     la vuelta -- 11 px de media entre dos cuadros vecinos y un tirón de 65 px entre el 41 y el
+     42. Deslizar la foto con el decimal del giro repartía ese salto y el giro se veía continuo.
+
+     El retoque (`_cap3d/retoque.py`) recentró cuadro a cuadro. Vuelto a medir sobre las fotos
+     que hay AHORA en `spin360`:
+
+         centro de la gorra .......... se mueve 2 px EN TODA LA VUELTA (antes 284)
+         salto entre cuadros vecinos . 0,48 px de media, 1,5 px en lo peor (antes 11 y 65)
+
+     O sea que ya no hay nada que tapar: la gorra está clavada. Y seguir deslizando la foto
+     encima de eso no arregla un salto, lo INVENTA -- el corrimiento entero valía 17,8 px de
+     media y 41 px en lo peor, así que al arrastrar la gorra se iba de lado y volvía, cuadro a
+     cuadro. Eso es exactamente lo que se veía como "bug en los giros".
+
+     Y no es cuestión de gusto, sale en el número que antes justificaba el invento. Diferencia
+     media entre dos cuadros vecinos, sobre las fotos de hoy:
+
+         sin corrimiento .... 7,99          <-- mejor
+         con corrimiento .... 9,62
+
+     Con el archivo viejo alinear BAJABA el error (22,5 -> 15,3); con el archivo recentrado lo
+     SUBE. El truco no se ha estropeado: es que ya no hace falta, y lo que compensaba ahora
+     descompensa. Se quita entero -- una foto por cuadro, quieta en su sitio. */
 
   /* --- lo que la traslación NO puede arreglar: el fundido SÓLO cuando corre ------------------
      Alinear quitó el grueso del bordado doble, pero no todo, y merece la pena decir por qué en
@@ -1198,12 +1210,10 @@
     /* 0 ó 1, nunca en medio: se ve UNA capa entera. `dec` sigue mandando abajo en el corrimiento,
        que es lo que mantiene el movimiento continuo sin necesidad de mezclar nada. */
     img2.style.opacity = Math.round(dec);
-    /* Alinear las dos capas antes de que se mezclen (ver arriba). Con `dec` a 0 -- que es como se
-       queda siempre parada, porque `encaja()` la lleva al cuadro entero -- las dos vuelven a 0 y
-       lo que se ve es la foto en su sitio, sin correr ni un píxel. */
-    var dx = DESPL[a];
-    img.style.transform  = 'translateX(' + (dec * dx).toFixed(3) + '%)';
-    img2.style.transform = 'translateX(' + ((dec - 1) * dx).toFixed(3) + '%)';
+    /* Ni una transformación en las capas: la foto se enseña donde está. Con la gorra ya clavada
+       en el archivo (2 px de paseo en toda la vuelta), mover la imagen sólo podía estropearlo.
+       El decimal sigue mandando -- decide QUÉ cuadro se ve y mueve la aguja -- pero ya no
+       desplaza nada. */
     /* La aguja también deja de ir a saltos: se mueve con el decimal, como la gorra. */
     if (dial) dial.style.left = (vuelve(ent) + dec) / N * 100 + '%';
   }
@@ -1248,11 +1258,28 @@
     if (grandePedida) return;
     grandePedida = true;
     if (JUEGO === 'spin360') return;            // ya estaba en grande: nada que pedir
-    JUEGO = 'spin360';
-    visible = visible2 = -1; pinta();           // el cuadro de ahora, ya en grande
-    /* Van a `fotos` por lo mismo que las otras: una imagen sin referencia viva es candidata a
-       que el navegador la tire, y entonces girar ampliado parpadearía cuadro a cuadro. */
-    for (var i = 0; i < N; i++){ var im = new Image(); im.src = src(i); fotos.push(im); }
+    /* ⚠️ PRIMERO SE TRAEN, LUEGO SE CAMBIA. Antes se cambiaba `JUEGO` en la línea de arriba y se
+       repintaba en el acto -- pero las 72 grandes (8 MB) no estaban descargadas todavía, así que
+       el `src` apuntaba a archivos que aún venían por el cable. Cambiar el src por una foto que
+       no ha llegado pinta el hueco VACÍO, y girando eso es un cuadro en blanco detrás de otro:
+       en un móvil con datos, varios segundos de gorra a trompicones justo después de ampliar.
+       Ahora el juego pequeño sigue en pantalla -- más blando, pero entero y girable -- y el
+       relevo se da de una pieza cuando las 72 están de verdad en memoria. */
+    var faltan = N;
+    for (var i = 0; i < N; i++){
+      var im = new Image();
+      /* Contar los fallos igual que los aciertos: si faltara un archivo, el relevo no llegaría
+         nunca y la gorra se quedaría en pequeño para siempre sin decir por qué. */
+      im.onload = im.onerror = function(){
+        if (--faltan) return;
+        JUEGO = 'spin360';
+        visible = visible2 = -1; pinta();       // el cuadro de AHORA, ya en grande
+      };
+      im.src = 'spin360/' + String(i).padStart(2,'0') + EXT;
+      /* Van a `fotos` por lo mismo que las otras: una imagen sin referencia viva es candidata a
+         que el navegador la tire, y entonces girar ampliado parpadearía cuadro a cuadro. */
+      fotos.push(im);
+    }
   }
 
   function limita(){
@@ -1275,10 +1302,19 @@
     z2 = z2 < ZMIN ? ZMIN : z2 > ZMAX ? ZMAX : z2;
     if (Math.abs(z2 - z) < 0.001) return;
     var w = clip.clientWidth, h = clip.clientHeight;
-    /* Sin foco (los botones) se apunta a la COPA, no al centro de la caja. El centro geométrico
-       de un recorte 1260x630 cae en la costura de la visera; el bordado, que es lo que se viene
-       a mirar, está más arriba. Acercar al centro obligaba a perseguirlo girando. */
-    if (px == null){ px = w / 2; py = h * 0.40; }
+    /* Sin foco (los botones) se apunta AL BORDADO, que es a lo que se viene. Dónde cae el
+       bordado no se supone: se mide, siguiendo los píxeles de hilo (los que pasan de 150) en
+       el cuadro de frente y en sus vecinos:
+
+           cuadro 12 ... x 55,0%   y 48,5%
+           cuadro 17 ... x 51,3%   y 48,8%   <- el de frente, el que se ve al pulsar +
+           cuadro 23 ... x 44,7%   y 49,9%
+
+       O sea el centro justo. Aquí ponía `h * 0.40`, y era verdad CUANDO el archivo medía
+       1640x662 con la gorra pequeña y alta dentro del cuadro; recortado a 1260x630 la gorra
+       llena la foto y su bordado quedó en el medio. Los 9 puntos de más apuntaban el zoom por
+       encima del logo: al ampliar salía copa y el bordado se iba hacia abajo. */
+    if (px == null){ px = w / 2; py = h * 0.49; }
     tx = px - (z2 / z) * (px - tx);
     ty = py - (z2 / z) * (py - ty);
     z = z2; limita(); aplica();
@@ -1313,8 +1349,8 @@
   stage.addEventListener('touchstart', function(e){
     if (e.touches.length !== 2) return;
     pinD = sep(e.touches); pinZ = z;
-    arrastrando = moviendo = false;                           // pellizcar no es ni girar ni mover
-    stage.classList.remove('girando','movida');
+    arrastrando = false;                                      // pellizcar no es girar
+    stage.classList.remove('girando');
   }, {passive:true});
   stage.addEventListener('touchmove', function(e){
     if (e.touches.length !== 2 || !pinD) return;
@@ -1339,24 +1375,23 @@
      la prolongación de ese dedo: se apaga sola y se para en seco si la vuelven a tocar. Ese es
      el trato -- lo que se mueve, se mueve porque lo han movido. */
   var x0=0, base=0, arrastrando=false, vel=0, tUlt=0, xUlt=0, anim=0;
-  var moviendo=false, mx0=0, my0=0, tx0=0, ty0=0;   // el mismo dedo, cuando está ampliada
 
   stage.addEventListener('pointerdown', function(e){
     /* Sin las 72 no se gira: cambiar el src por una foto que no ha llegado pinta el hueco en
        BLANCO, y arrastrando deprisa eso es un parpadeo por cuadro sobre fondo negro. */
     if (!stage.classList.contains('lista')) return;
-    /* AMPLIADA EL DEDO NO GIRA: mueve la foto. Es lo que hace cualquier visor de fotos, lo que el
-       cursor ya prometía (`grab`) y lo único que tiene sentido cuando alguien está mirando el
-       hilo de cerca -- girar ampliado saca el bordado de la pantalla en dos dedos de gesto.
-       Para volver a girar se sale del zoom; las flechas del teclado giran siempre, ampliada o no. */
-    if (z > 1.001){
-      moviendo = true;
-      mx0 = e.clientX; my0 = e.clientY; tx0 = tx; ty0 = ty;
-      cancelAnimationFrame(anim); vel = 0;
-      stage.setPointerCapture(e.pointerId);
-      stage.classList.add('tocada','movida');
-      return;
-    }
+    /* AMPLIADA TAMBIÉN GIRA. Aquí había una excepción -- ampliada el dedo movía la foto en vez de
+       girar -- y hay que contar por qué estaba y por qué se va, que no es un cambio de gusto.
+       Estaba porque la gorra NO ESTABA CLAVADA: se paseaba 284 px a lo largo de la vuelta, así
+       que girar ampliado al doble sacaba el bordado de la caja en medio gesto y dejaba al
+       visitante mirando un trozo de paño negro. Con eso encima, mover la foto era lo menos malo.
+       Desde que los cuadros se recentraron la gorra se mueve 2 px EN TODA LA VUELTA: ampliada al
+       doble eso son 4 px de pantalla. El bordado se queda donde está toda la vuelta, y el motivo
+       de la excepción se ha ido con el archivo viejo.
+       Lo que quedaba era una gorra que al ampliarla se quedaba tiesa -- que es como se vive, no
+       como "otro modo". Vuelve el trato de siempre y el que ya prometía el cursor: el dedo gira,
+       esté cerca o lejos. Para elegir QUÉ mirar de cerca están la rueda con Ctrl y el pellizco,
+       que amplían hacia donde se apunta. */
     arrastrando = true;
     cancelAnimationFrame(anim); vel = 0;         // tocar CORTA la inercia, no la acumula
     x0 = xUlt = e.clientX; base = pos; tUlt = performance.now();
@@ -1365,15 +1400,6 @@
   });
 
   stage.addEventListener('pointermove', function(e){
-    if (moviendo){
-      /* Píxel de dedo = píxel de pantalla, sin dividir por la escala: lo que se arrastra es la
-         foto YA ampliada, así que se mueve exactamente lo que se mueve la mano. `limita` impide
-         sacar un borde al aire. */
-      tx = tx0 + (e.clientX - mx0);
-      ty = ty0 + (e.clientY - my0);
-      limita(); aplica();
-      return;
-    }
     if (!arrastrando) return;
     /* Arrastrar a la derecha empuja la gorra a la derecha, o sea que la cara que mira al
        visitante se va por ese lado: el índice BAJA, porque la secuencia está grabada girando
@@ -1411,7 +1437,6 @@
   }
 
   function suelta(){
-    if (moviendo){ moviendo = false; stage.classList.remove('movida'); return; }
     if (!arrastrando) return;
     arrastrando = false;
     stage.classList.remove('girando');
