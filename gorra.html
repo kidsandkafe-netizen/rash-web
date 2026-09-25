@@ -220,17 +220,18 @@
   /* ---------- MÓVIL: barra de arriba limpia (solo RASH centrado) ---------- */
   @media (max-width:640px){
     nav{padding:18px 20px;justify-content:center}
-    /* Aqui ponia `nav .links{display:none}` y encima una regla `nav .brand{...}`. Pero en el
-       HTML NO existe ningun `.brand`: es CSS heredado de index.html. El resultado real en el
-       movil era una barra de arriba VACIA -- y aun asi `nav::before` seguia pintando su velo
-       negro de 150 px en cuanto bajabas. Un velo encima del producto a cambio de nada, y sin
-       puerta de vuelta a la casa madre. Se esconden SOLO los dos enlaces de seccion (el indice
-       de la pagina ya lo da el propio scroll) y el que se queda -- RASH -- se viste de sello,
-       que es lo que la regla muerta queria decir. */
-    nav .links{gap:0}
-    nav .links a[href="#gorra"],nav .links a[href="#contacto"]{display:none}
-    nav .links a[href="index.html"]{font-family:'Cormorant Garamond',serif;font-size:17px;
-      letter-spacing:.34em;padding-left:.34em;color:var(--gold)}
+    /* EN EL MOVIL LA BARRA DE ARRIBA NO LLEVA NADA, y conviene dejar escrito el viaje de ida
+       y vuelta de esta regla para no repetirlo.
+       El 25-sep saque aqui el enlace RASH en serif dorado. La intencion era buena -- la barra
+       quedaba vacia y aun asi `nav::before` pintaba su velo -- pero el resultado era malo por
+       una razon que no vi hasta que Rashid la vio: en movil `nav` va `justify-content:center`,
+       asi que ese RASH cae CENTRADO Y JUSTO ENCIMA de la cabeza facetada del hero. Dos veces
+       la marca, una sobre otra, peleandose. En escritorio no pasa porque la barra va a la
+       derecha y la cabeza al centro.
+       El hero ya dice quien eres: cabeza + RASH debajo. La barra no tiene que repetirlo.
+       Y el velo se apaga aqui mismo, que era el problema de verdad que yo queria arreglar. */
+    nav .links{display:none}
+    nav::before{display:none}
     .heroSub{bottom:8vh;font-size:9px;letter-spacing:.42em}
     .cue{font-size:9px;letter-spacing:.34em}
     section.block{padding:11vh 7vw;min-height:70vh}
