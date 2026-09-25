@@ -573,15 +573,22 @@
   .gzoom button:disabled{opacity:.28;cursor:default}
   .gzoom button:focus-visible{outline:1px solid #6b5426;outline-offset:2px}
   .gzoom span{font-size:9px;letter-spacing:.2em;color:#54514a;min-width:22px;text-align:center}
-  /* ⚠️ AQUÍ HABÍA UN `touch-action:none` mientras estaba ampliada, y era la tercera pata del
-     mismo fallo. Se puso porque ampliada el dedo MOVÍA la foto y para moverla en vertical hay
-     que quitarle el gesto al navegador. Pero `none` significa "no te dejo hacer NADA con el
-     dedo aquí": ampliada, la página ya no bajaba con el dedo encima de la gorra. Junto con que
-     el dedo tampoco giraba, lo que quedaba era una gorra que al ampliarla no respondía a nada
-     -- congelada, dicho tal cual.
-     Ampliada ya sólo se gira, igual que de lejos, así que no hay nada que añadir: vale el
-     `pan-y` que trae `.gstage`, que cede el horizontal (girar) y devuelve el vertical (bajar la
-     página). Y el `grabbing` lo pone `.girando`, que ahora entra esté ampliada o no. */
+  /* AMPLIADA, EL VERTICAL ES DE LA GORRA -- y conviene dejar escrito el vaivén de esta línea,
+     porque ha ido y ha vuelto y no por capricho.
+     De lejos manda el `pan-y` de `.gstage`: el horizontal es nuestro (girar) y el vertical se lo
+     queda el navegador (bajar la página). Ese reparto está bien mientras la foto entera cabe en
+     la caja, porque no hay nada fuera que ir a buscar.
+     Ampliada deja de estar bien. A 2,2x (pantalla de ordenador) se ve el 45% del alto y queda
+     FUERA el 52% de la gorra; a 3x (móvil) se ve el 33% y queda fuera el 65%. Con el vertical
+     cedido al navegador, más de media gorra -- la visera, la copa de arriba -- era inalcanzable:
+     no es que no se moviera, es que no había forma de llegar. Así que ampliada se recupera el
+     vertical y el dedo hace las dos cosas a la vez: a lo ancho gira, a lo alto pasea.
+     El precio de `none` es real y es el mismo de antes: con el dedo encima de la gorra AMPLIADA
+     la página no baja. Se paga sólo ampliada -- un estado que se pide a propósito y del que se
+     sale con el `−` que está ahí al lado -- y de lejos, que es como se llega y como se navega,
+     el scroll sigue intacto. Lo que NO vuelve es la excepción de antes: ampliada se sigue
+     girando; el vertical se añade, no sustituye. */
+  .gstage.zoom{touch-action:none}
 
   .ghint2{color:#3b3933}
   @media (max-width:640px){ .ghint2{display:none} }
@@ -1374,7 +1381,7 @@
      NO gira sola. Nunca. La gorra sólo se mueve mientras hay un dedo encima, y la inercia es
      la prolongación de ese dedo: se apaga sola y se para en seco si la vuelven a tocar. Ese es
      el trato -- lo que se mueve, se mueve porque lo han movido. */
-  var x0=0, base=0, arrastrando=false, vel=0, tUlt=0, xUlt=0, anim=0;
+  var x0=0, base=0, arrastrando=false, vel=0, tUlt=0, xUlt=0, yUlt=0, anim=0;
 
   stage.addEventListener('pointerdown', function(e){
     /* Sin las 72 no se gira: cambiar el src por una foto que no ha llegado pinta el hueco en
@@ -1394,7 +1401,7 @@
        que amplían hacia donde se apunta. */
     arrastrando = true;
     cancelAnimationFrame(anim); vel = 0;         // tocar CORTA la inercia, no la acumula
-    x0 = xUlt = e.clientX; base = pos; tUlt = performance.now();
+    x0 = xUlt = e.clientX; yUlt = e.clientY; base = pos; tUlt = performance.now();
     stage.setPointerCapture(e.pointerId);
     stage.classList.add('tocada','girando');
   });
@@ -1410,6 +1417,17 @@
     /* Velocidad del último tramo, no de todo el gesto: si alguien arrastra despacio y suelta
        de golpe, lo que manda es el golpe final. */
     if (dt > 8){ vel = -(e.clientX - xUlt) * porPx / dt; tUlt = t; xUlt = e.clientX; }
+    /* A lo ALTO, ampliada, el mismo dedo pasea la foto. No es un segundo modo ni hay que elegir:
+       el gesto se reparte por ejes -- la componente horizontal gira, la vertical mueve -- así que
+       un arrastre en diagonal hace las dos a la vez y nadie tiene que aprender nada.
+       De lejos (`z` = 1) esto no hace NADA: `limita()` devuelve el desplazamiento a cero porque
+       la foto ya cubre la caja, y `aplica()` deja el transform vacío. El comportamiento a escala
+       1 es exactamente el de antes, sin una capa de más.
+       A lo ANCHO no se pasea a propósito: ese eje es el del giro, y de todas formas la gorra está
+       centrada en los 72 cuadros (2 px de paseo en toda la vuelta), así que lo que hay a los
+       lados llega solo girando. Lo que no llegaba era lo de arriba y lo de abajo. */
+    if (z > 1.001){ ty += e.clientY - yUlt; limita(); aplica(); }
+    yUlt = e.clientY;
     pinta();
   });
 
