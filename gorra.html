@@ -857,14 +857,24 @@
   var stPar=stSec?stSec.querySelector('.stallion-photo .par'):null;   // capa parallax de la foto
   var stText=stSec?stSec.querySelector('.stallion-text'):null;
   var stTouch = (window.matchMedia && matchMedia('(hover:none),(pointer:coarse)').matches);  // en tactil, sin parallax
-  var mx=0,my=0, tmx=0,tmy=0, t0=null, INTRO=2600, sp=0;
+  var mx=0,my=0, tmx=0,tmy=0, t0=null, INTRO=2600, sp=0, spT=0, spH=0;
 
   function ease(x){return 1-Math.pow(1-x,3);}   // easeOutCubic
 
   // progreso de scroll 0..1 en el primer viewport = cuanto se disuelve el hero
   function onScroll(){
     var y = window.scrollY || window.pageYOffset || 0;
-    sp = Math.min(Math.max(y,0)/(innerHeight*0.6), 1);
+    sp = Math.min(Math.max(y,0)/(innerHeight*1.0), 1);
+    /* TRASPASO hero -> producto. Tres relojes distintos a proposito:
+         sp  (1.00vh) = el VIAJE (subida del hero). Largo: acompana hasta que la gorra esta en escena.
+         spT (0.42vh) = el WORDMARK. Se va PRONTO: es fijo con z-index 12, por encima de la seccion,
+                        y si dura se superpone encima de la copa y del texto (medido, se ve).
+         spH (0.40->0.82vh) = la LUZ de la cabeza. Aguanta encendida el primer 40vh y muere a 82vh:
+                        antes quedaban ~520 px (59% de pantalla) sin nada iluminado entre el hero y
+                        la gorra y la pagina parecia acabarse; y si dura mas, el borde opaco de la
+                        seccion le corta media cabeza y queda un fantasma. */
+    spT = Math.min(Math.max(y,0)/(innerHeight*0.42), 1);
+    spH = Math.min(Math.max(y - innerHeight*0.40, 0)/(innerHeight*0.42), 1);
     /* Apagar el aviso de scroll en cuanto se ha movido de verdad. 40 px y no 1 px: el rebote
        elástico del móvil y el ancla `#gorra` mueven la página sola, y no hay que castigar eso. */
     document.body.classList.toggle('bajado', y > 40);
@@ -887,7 +897,7 @@
     // la opacidad se materializa CON la luz (invisible al principio, no silueta oscura)
     var op = Math.min((ts-t0)/3600, 1);
     var eo = Math.pow(op, 2.3);                  // ease-in: nace de la nada pero empieza antes, sube despacito
-    hero.style.opacity = eo*(1-sp);
+    hero.style.opacity = eo*(1-spH);
     hero.style.transform =
       'translateY('+(floatY+lift).toFixed(1)+'px) scale('+scale.toFixed(3)+') '+
       'rotateY('+ry.toFixed(2)+'deg) rotateX('+rx.toFixed(2)+'deg)';
@@ -902,14 +912,14 @@
     }
     // el wordmark RASH tambien se desvanece y sube (gate: al volver arriba, manda el CSS)
     if(title){
-      if(sp>0){ title.style.transition='none';
-        title.style.opacity=(1-sp).toFixed(3);
-        title.style.transform='translateY('+(-sp*55).toFixed(1)+'px)';
+      if(spT>0){ title.style.transition='none';
+        title.style.opacity=(1-spT).toFixed(3);
+        title.style.transform='translateY('+(-spT*55).toFixed(1)+'px)';
       } else { title.style.transition=''; title.style.opacity=''; title.style.transform=''; }
     }
     // el cono de luz de estudio se apaga con el scroll
     if(shaft){
-      if(sp>0){ shaft.style.transition='none'; shaft.style.opacity=(1-sp).toFixed(3); }
+      if(spT>0){ shaft.style.transition='none'; shaft.style.opacity=(1-spT).toFixed(3); }
       else { shaft.style.transition=''; shaft.style.opacity=''; }
     }
     // UMBRILLIO: ENTRADA DESDE EL FONDO atada al scroll — crece de la profundidad (como el logo "de lejos"),
