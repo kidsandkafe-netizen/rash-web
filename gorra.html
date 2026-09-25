@@ -527,7 +527,15 @@
   /* `will-change:transform` porque el guion reescribe el `translateX` de las dos capas en cada
      movimiento del dedo para alinearlas antes del fundido: avisando, el navegador las deja en su
      propia capa de GPU y el corrimiento no cuesta un repintado. */
-  #gspin,#gspin2{display:block;width:100%;aspect-ratio:1640/662;height:auto;object-fit:contain;
+  /* 1260/630 y no 1640/662: los cuadros se rehicieron RECENTRADOS y recortados (ver
+     `_cap3d/retoque.py`). El archivo viejo era 1640 de ancho pero la gorra de frente medía
+     871 px MEDIDOS -- el 53 %. Casi la mitad de cada foto era aire negro, y ese aire ocupa
+     sitio en la página exactamente igual que el producto: por eso la gorra se veía pequeña
+     sin que hubiera nada mal en el CSS. Recentrando cuadro a cuadro (el centro se movía
+     284 px de un extremo al otro de la vuelta, porque quien la giró era una mano y no un
+     torno) el lienzo baja a 1260x630 sin cortar ni el cuadro más ancho (1191x591 medido).
+     Misma caja en pantalla, gorra 1,32 veces más grande y más píxeles de verdad para la lupa. */
+  #gspin,#gspin2{display:block;width:100%;aspect-ratio:1260/630;height:auto;object-fit:contain;
     will-change:transform}
   /* Sin transición NINGUNA: esta opacidad la escribe el guion sesenta veces por segundo con el
      decimal del giro. Una transición aquí le añadiría un retardo a cada escritura y la gorra
@@ -646,13 +654,11 @@
     /* En una columna el visor ya ocupa todo el ancho: la altura la manda la proporción de los
        cuadros, no un `min(46vh,380px)` que volvía a meter bandas negras. */
 
-    /* A SANGRE. Los cuadros son 1640x662 (proporción 2,48 impuesta por la visera cuando la
-       gorra se pone de perfil: medido, la gorra llega a ocupar 1192 px de ancho y sólo quedan
-       93 px de aire a la izquierda y 86 a la derecha, así que recortar no daría casi nada).
-       Con una proporción tan apaisada, cada píxel de ancho que se le quita a la caja son 0,4
-       píxeles de gorra: los 2x6vw de margen dejaban el producto en 343x139 en un iPhone.
-       Sacando el visor a los bordes de la pantalla pasa a 390x157 -- un 14 % más -- y además
-       el borde a borde es de por sí el gesto de escaparate. El texto conserva su margen. */
+    /* A SANGRE. Los cuadros son 1260x630 (proporción 2,0). Cada píxel de ancho que se le
+       quita a la caja son medio píxel de gorra: los 2x6vw de margen dejaban el producto
+       pequeño en un iPhone. Sacando el visor a los bordes de la pantalla se gana un 14 %
+       de ancho, y además el borde a borde es de por sí el gesto de escaparate. El texto
+       conserva su margen. */
     section.gorra .gvis{margin-left:-6vw;margin-right:-6vw}
 
     /* A 390 px de ancho, .34em de interletrado no cabe: se aprieta un punto. */
@@ -665,7 +671,7 @@
 </style>
   <!-- La foto de frente, y a propósito la PEQUEÑA y en JPEG: es la que enseña la gorra en los
        primeros milisegundos, así que lo que se le pide no es resolución sino que llegue ya y no
-       falle en ningún navegador (30 KB). El juego bueno -- 1640 y WebP donde toque -- lo elige
+       falle en ningún navegador. El juego bueno -- 1260 y WebP donde toque -- lo elige
        el guion en cuanto mide la pantalla, y repinta este mismo hueco. -->
   <link rel="preload" as="image" href="spin360s/17.jpg" fetchpriority="high">
 </head>
@@ -976,7 +982,7 @@
   /* --- qué juego de fotos pedir --------------------------------------------------------------
      Hay dos entregas y dos formatos, y la elección se hace aquí una sola vez.
 
-     TAMAÑO. `spin360` va a 1640 px de ancho y `spin360s` a 820. No se elige por "móvil o no",
+     TAMAÑO. `spin360` va a 1260 px de ancho y `spin360s` a 630. No se elige por "móvil o no",
      que es una pregunta que ya no contesta nada -- hay móviles con más píxeles que portátiles.
      Se mide lo que el visor VA A PEDIR de verdad: su ancho en pantalla por la densidad de esa
      pantalla. Un móvil de 390 px a 2x pide 780 y le sobra con el pequeño; un portátil con el
@@ -994,7 +1000,10 @@
   var JUEGO = 'spin360', EXT = '.jpg', fmtListo = false, enEspera = null;
   function eligeJuego(){
     var pide = (stage.clientWidth || window.innerWidth) * (window.devicePixelRatio || 1);
-    if (pide <= 900) JUEGO = 'spin360s';
+    /* 700 y no 900: el juego pequeño ya no mide 820 px de ancho sino 630 (los cuadros se
+       recortaron). El umbral tiene que seguir al archivo, si no se le manda el pequeño a
+       pantallas que piden 900 y el bordado sale reblandecido. */
+    if (pide <= 700) JUEGO = 'spin360s';
     function resuelve(webp){
       if (fmtListo) return;                   // el que llegue primero manda; el otro no hace nada
       if (webp) EXT = '.webp';
@@ -1095,7 +1104,8 @@
   /* --- por qué el fundido NO puede ser a pelo: el BORDADO DOBLE -------------------------------
      Mezclar los dos cuadros tal cual tenía un defecto que se veía a la primera, y en lo peor: el
      logo. Entre dos fotos vecinas la gorra no se mueve un poco, se mueve MUCHO -- medido por
-     correlación sobre la copa, 17,5 px de media y hasta 36 px por delante, sobre 1640. A mitad de
+     correlación sobre la copa, 17,5 px de media y hasta 36 px por delante, sobre 1640 (el ancho que
+     tenía entonces el archivo). A mitad de
      fundido eso son dos cabezas de caballo plateadas separadas 30 px: CUATRO orejas. En una marca
      cuyo logo es la cabeza de caballo eso no es un efecto de movimiento, es una errata.
 
@@ -1117,16 +1127,26 @@
      lado; el +0,488 del 28 es el único positivo y es donde la gorra está de perfil y hay poca
      textura a la que agarrarse -- vale medio punto porcentual, no se nota, y se deja MEDIDO en
      vez de maquillado. */
+  /* TABLA NUEVA, vuelta a medir sobre los cuadros RECENTRADOS (`_cap3d/publica.py`).
+     Había que rehacerla: la vieja medía dos cosas sumadas -- la rotación de verdad Y el
+     bailoteo de la mano que giraba la gorra -- y ese bailoteo ya no existe, se quitó en el
+     archivo. Se nota en la forma de los números: la tabla vieja iba a saltos (-1,95 seguido
+     de -0,91) porque el temblor entraba y salía; ésta sube y baja en una curva limpia, casi
+     plana en el 0 y en el 35 (gorra de frente y de espaldas, donde el giro casi no corre por
+     la pantalla) y máxima entre el 46 y el 64 (de perfil, donde más corre). Eso es rotación
+     sola, que es justo lo que debe compensar el corrimiento.
+     Comprobado que no se sale del lienzo: en el peor de los 72, contando el corrimiento
+     entero, sobran 19 px hasta el canto. */
   var DESPL = [
-     -0.549,  -0.549,  -0.305,  -0.610,  -0.915,  -1.951,  -0.915,  -1.098,
-     -1.585,  -1.768,  -1.768,  -1.707,  -1.768,  -1.890,  -1.829,  -2.012,
-     -1.768,  -1.707,  -1.951,  -2.195,  -2.195,  -1.829,  -1.707,  -1.646,
-     -1.585,  -1.220,  -1.159,  -0.793,   0.488,  -0.366,  -0.732,  -0.488,
-     -0.305,  -0.549,  -0.854,  -0.610,  -0.854,  -1.280,  -1.524,  -0.915,
-     -0.732,  -0.427,  -0.610,  -0.793,  -0.915,  -1.098,  -1.707,  -1.646,
-     -1.402,  -1.280,  -1.098,  -0.854,  -0.976,  -0.488,  -0.183,  -0.610,
-     -0.915,  -0.854,  -0.732,  -0.610,  -0.732,  -0.854,  -0.610,  -0.610,
-     -0.915,  -0.854,  -0.854,  -1.159,  -1.159,  -0.610,  -0.549,  -0.183
+     -0.238,  -0.952,  -0.556,  -0.714,  -0.873,  -0.317,  -1.349,  -1.190,
+     -1.032,  -1.270,  -1.111,  -1.270,  -1.349,  -1.429,  -1.587,   0.079,
+      0.476,  -0.873,  -1.587,  -1.587,  -1.905,  -1.667,  -1.429,  -1.349,
+     -1.667,  -1.190,  -1.190,  -1.270,   0.159,  -1.270,  -0.873,  -0.079,
+     -0.556,  -0.397,  -0.079,  -0.079,  -0.238,  -0.476,  -0.635,  -1.032,
+     -1.429,  -1.508,  -1.508,  -1.349,  -2.143,  -1.825,  -2.778,  -2.937,
+     -3.095,  -2.778,  -2.222,  -2.619,  -2.778,  -2.063,  -2.063,  -2.143,
+     -2.698,  -2.698,  -2.222,  -3.016,  -2.778,  -2.937,  -3.254,  -1.667,
+     -3.175,  -2.302,  -1.349,  -0.476,  -0.238,   0.079,  -0.079,   0.238
   ];
 
   /* --- lo que la traslación NO puede arreglar: el fundido SÓLO cuando corre ------------------
@@ -1199,8 +1219,8 @@
      · Se amplía HACIA DONDE MIRAS, no hacia el centro. Con la rueda o con dos dedos, el punto
        que está bajo el cursor se queda clavado donde estaba -- `t2 = p - (z2/z)·(p - t)`. Ampliar
        siempre al centro obliga a perseguir la pieza a cada paso.
-     · Al pasar de 1 se cambia al juego GRANDE. En móvil se sirven las fotos de 820 px, que a
-       tamaño de página son de sobra; ampliadas serían una mancha. Las de 1640 se piden sólo
+     · Al pasar de 1 se cambia al juego GRANDE. En móvil se sirven las fotos de 630 px, que a
+       tamaño de página son de sobra; ampliadas serían una mancha. Las de 1260 se piden sólo
        cuando alguien pide ver de cerca -- que es la única vez que justifican sus megas.
      · Ampliada, la gorra SIGUE GIRANDO con el dedo. No hay modo lupa ni modo giro: es la misma
        pieza más cerca. El trato de la página (lo que se mueve, se mueve porque lo han movido) no
@@ -1208,10 +1228,10 @@
   var film = document.getElementById('gfilm'), clip = film.parentNode,
       bMas = document.getElementById('gmas'), bMenos = document.getElementById('gmenos'),
       niv  = document.getElementById('gniv');
-  var z = 1, tx = 0, ty = 0, ZMIN = 1, ZMAX = 2, ANCHO_FOTO = 1640, grandePedida = false;
+  var z = 1, tx = 0, ty = 0, ZMIN = 1, ZMAX = 2, ANCHO_FOTO = 1260, grandePedida = false;
 
   /* Hasta dónde se deja acercar: NO un número redondo, sino hasta donde la foto tiene detalle de
-     verdad. A escala 1 la gorra ya viene reducida (1640 px de archivo en una caja de ~1100), así
+     verdad. A escala 1 la gorra ya viene reducida (1260 px de archivo en una caja de ~800), así
      que hay margen gratis hasta llegar a tamaño nativo. Pasado eso el navegador empieza a
      inventar píxeles y el bordado se vuelve una mancha -- justo lo contrario de lo que se viene
      a enseñar. Se permite un 40% por encima de lo nativo, que es donde todavía parece tejido, y
@@ -1256,7 +1276,7 @@
     if (Math.abs(z2 - z) < 0.001) return;
     var w = clip.clientWidth, h = clip.clientHeight;
     /* Sin foco (los botones) se apunta a la COPA, no al centro de la caja. El centro geométrico
-       de un recorte 1640x662 cae en la costura de la visera; el bordado, que es lo que se viene
+       de un recorte 1260x630 cae en la costura de la visera; el bordado, que es lo que se viene
        a mirar, está más arriba. Acercar al centro obligaba a perseguirlo girando. */
     if (px == null){ px = w / 2; py = h * 0.40; }
     tx = px - (z2 / z) * (px - tx);
@@ -1370,7 +1390,7 @@
   /* --- ENCAJAR al parar ----------------------------------------------------------------------
      Ya no hay fundido, pero encajar sigue haciendo falta, y por una razón distinta: a mitad de
      paso la foto que se ve está CORRIDA (hasta media distancia entre cuadro y cuadro, que medido
-     sobre la copa son 17,5 px de media y 36 px en lo peor, sobre 1640 de ancho). Corrida no está
+     sobre la copa son 17,5 px de media y 36 px en lo peor). Corrida no está
      mal mientras se mueve -- es lo que hace el movimiento continuo -- pero parada deja la gorra
      descentrada respecto a su sombra y al espacio de la caja, y eso en un producto de lujo se ve.
      Así que al pararse se desliza al cuadro entero más cercano: medio paso como mucho, dos
