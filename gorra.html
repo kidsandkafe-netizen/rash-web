@@ -213,7 +213,6 @@
        cualquiera de las dos cosas por separado. Sobre negro, una franja negra no se ve. */
     background:linear-gradient(180deg, #020203 0, #020203 58px, rgba(2,2,3,.62) 98px, rgba(2,2,3,0) 150px)}
   body.go.bajado nav::before{opacity:1}
-  nav .brand{font-family:'Cormorant Garamond',serif;font-size:22px;letter-spacing:.5em;padding-left:.5em}
   nav .links{display:flex;gap:26px;font-size:11px;letter-spacing:.22em;color:var(--soft);text-transform:uppercase}
   nav .links a{cursor:pointer;transition:color .3s;color:inherit;text-decoration:none}
   nav .links a:hover{color:var(--goldh)}
@@ -221,8 +220,17 @@
   /* ---------- MÓVIL: barra de arriba limpia (solo RASH centrado) ---------- */
   @media (max-width:640px){
     nav{padding:18px 20px;justify-content:center}
-    nav .brand{font-size:17px;letter-spacing:.34em;padding-left:.34em}
-    nav .links{display:none}
+    /* Aqui ponia `nav .links{display:none}` y encima una regla `nav .brand{...}`. Pero en el
+       HTML NO existe ningun `.brand`: es CSS heredado de index.html. El resultado real en el
+       movil era una barra de arriba VACIA -- y aun asi `nav::before` seguia pintando su velo
+       negro de 150 px en cuanto bajabas. Un velo encima del producto a cambio de nada, y sin
+       puerta de vuelta a la casa madre. Se esconden SOLO los dos enlaces de seccion (el indice
+       de la pagina ya lo da el propio scroll) y el que se queda -- RASH -- se viste de sello,
+       que es lo que la regla muerta queria decir. */
+    nav .links{gap:0}
+    nav .links a[href="#gorra"],nav .links a[href="#contacto"]{display:none}
+    nav .links a[href="index.html"]{font-family:'Cormorant Garamond',serif;font-size:17px;
+      letter-spacing:.34em;padding-left:.34em;color:var(--gold)}
     .heroSub{bottom:8vh;font-size:9px;letter-spacing:.42em}
     .cue{font-size:9px;letter-spacing:.34em}
     section.block{padding:11vh 7vw;min-height:70vh}
@@ -598,18 +606,28 @@
   .ghint2{color:#3b3933}
   @media (max-width:640px){ .ghint2{display:none} }
 
-  /* EL MANDO DE LA LUPA NO SALE EN TACTIL, y no es por ahorrar sitio: es que en el movil
-     sobraba y encima estorbaba.
-       · La pagina YA habia decidido que era de raton. `.ghint2` -- el texto que dice "usa + para
-         ver el bordado" -- se esconde por debajo de 640 px. O sea que en el movil se escondia la
-         EXPLICACION del boton y se dejaba el boton: un mando de 34x92 px, sin etiqueta, encima
-         de la foto, a 12 px del borde derecho de una pantalla de 390. Medido, no a ojo.
-       · Y no se pierde nada, porque el pellizco de dos dedos ya esta implementado y es el gesto
-         que un dedo busca solo. El boton era la version para quien no tiene dos dedos libres:
-         el raton.
-     `hover:none` y no `max-width`: lo que decide no es lo estrecha que sea la pantalla sino si
-     hay puntero fino. Un iPad de 1024 px tambien se pellizca. */
-  @media (hover:none){ .gzoom{display:none} }
+  /* EL MANDO DE LA LUPA SE QUEDA TAMBIEN EN TACTIL -- y queda escrito por que, porque esta linea
+     ya se equivoco una vez.
+     Estuvo en `display:none` bajo `hover:none`. El razonamiento parecia bueno: el pellizco de dos
+     dedos ya existe, y la pagina misma escondia `.ghint2` -- el texto "usa + para ver el bordado"
+     -- por debajo de 640 px, o sea que en el movil quedaba un mando de 34x92 px sin explicacion
+     encima de la foto. Pero borrarlo era pasarse, por dos motivos concretos:
+       · En el movil NADA anunciaba ya que se pudiera ampliar. La explicacion estaba oculta desde
+         antes, asi que quitar tambien el boton dejaba el bordado en plata -- que es lo que vende
+         la gorra -- escondido detras de un gesto que hay que adivinar.
+       · El comentario de aqui arriba se quedaba MINTIENDO: dice que de la vista ampliada "se sale
+         con el `-` que esta ahi al lado". No estaba. Ampliada, `touch-action:none` se come el
+         scroll vertical, y la unica salida era volver a pellizcar.
+     La queja de origen era que el movil se veia CARGADO, y eso se arregla bajando el volumen, no
+     borrando: mas pequeno, mas pegado a la esquina y a media tinta, hasta que se lee como un
+     control y no como un adorno. Ampliada vuelve a tinta entera, que es cuando hace falta. */
+  @media (hover:none){
+    .gzoom{bottom:8px;right:8px;gap:4px}
+    .gstage.lista .gzoom{opacity:.72}
+    .gstage.lista.zoom .gzoom{opacity:1}
+    .gzoom button{width:29px;height:29px;font-size:15px}
+    .gzoom span{font-size:8px}
+  }
 
   .ghint{margin:14px 0 0;text-align:center;pointer-events:none;
     font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:#54514a;
