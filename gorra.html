@@ -154,8 +154,14 @@
     80%   {opacity:1;transform:translate(-50%,-50%) scale(1.08)}
     100%  {opacity:.62;transform:translate(-50%,-50%) scale(1)}}
   @keyframes auraBreath{0%,100%{opacity:.52}50%{opacity:.68}}
+  /* SIN `transform-style:preserve-3d` A PROPOSITO. El giro 3D de la cabeza NO sale de aqui:
+     sale de `perspective:1500px` del padre (#heroWrap) + el rotateY/rotateX que el guion le pone
+     a este mismo elemento. `preserve-3d` solo serviria para hijos con giro 3D propio, y no hay
+     ninguno (las cuatro capas de luz son planas). Ademas choca con el `filter` de la linea de
+     abajo: la norma dice que un filtro aplana el elemento, asi que `preserve-3d` ya se ignoraba.
+     Dejarlo escrito hacia que Safari pintase la caja entera como un RECTANGULO NEGRO opaco. */
   #hero{position:relative;height:37vh;aspect-ratio:564/1500;
-    transform-style:preserve-3d;will-change:transform,filter;opacity:0;transform:scale(.72);
+    will-change:transform,filter;opacity:0;transform:scale(.72);
     filter:contrast(1.035) saturate(1.02) brightness(1.01)}
   /* REVELADO DE CINE: la cabeza emerge de la oscuridad segun la luz la descubre */
   body.go #hero{animation:heroReveal 4.1s cubic-bezier(.5,0,.2,1) both;}
@@ -178,8 +184,12 @@
       drop-shadow(0 22px 36px rgba(0,0,0,.6));}
   /* destello de luz que barre el metal (recortado a la silueta) */
   /* ILUMINACION DE CINE: key light suave arriba-izq + sombra de relleno abajo-der (claroscuro) */
+  /* La ruta va ESCRITA, no por `var(--h)`. Es el mismo archivo que usa `.head`, pero una
+     variable dentro de una mascara no es de fiar en todos los navegadores: si no la resuelve,
+     la mascara desaparece y estas tres capas de luz dejan de recortarse a la silueta = se ven
+     como un rectangulo. Escrita no puede fallar. `--h` sigue viva para el fondo de `.head`. */
   #hero .keylight,#hero .fillshade,#hero .rim{position:absolute;inset:0;pointer-events:none;
-    -webkit-mask-image:var(--h);mask-image:var(--h);
+    -webkit-mask-image:url('img/cabeza-rash.webp');mask-image:url('img/cabeza-rash.webp');
     -webkit-mask-size:100% 100%;mask-size:100% 100%;
     -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;}
   #hero .keylight{mix-blend-mode:screen;opacity:.9;
