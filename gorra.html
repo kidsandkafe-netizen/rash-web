@@ -1041,12 +1041,19 @@
              aislar no. -->
         <div class="gclip">
         <div class="gfilm" id="gfilm">
+          <!-- `decoding="sync"`, no `async`. ⚠️ No es un descuido: `async` es PERMISO para que el
+               navegador pinte el fotograma ANTES de tener la foto descodificada. Safari no lo usa
+               (se queda con el cuadro anterior), pero Chrome de Android SI lo usa: al arrastrar
+               rapido pinta el hueco, y eso es el parpadeo que se veia en los Samsung y no en el
+               iPhone. Medido: en un arrastre rapido la mitad de los cambios de `src` caen en la
+               capa que esta a la vista, asi que el hueco se ve. Quitar el permiso no cuesta
+               velocidad (medido: igual o algo mejor) ni toca ninguna imagen. -->
           <img id="gspin" src="spin360s/17.jpg?v=2" draggable="false" alt=""
-               decoding="async" fetchpriority="high">
+               decoding="sync" fetchpriority="high">
           <!-- Decorativa: la lee el guion, nunca un lector de pantalla. La descripción del
                producto vive en el `aria-label` del escenario, y repetirla aquí la diría dos
                veces. -->
-          <img id="gspin2" draggable="false" alt="" aria-hidden="true" decoding="async">
+          <img id="gspin2" draggable="false" alt="" aria-hidden="true" decoding="sync">
         </div>
 
         <!-- El mando de la lupa va dentro del RECORTE, no del escenario, y abajo. Puesto arriba
@@ -1155,8 +1162,9 @@
                Si se queda atras, lo primero que se ve es la copia vieja en cache y parece que
                no ha cambiado nada por mucho que se rehagan las 72. -->
           <img id="bspin" src="spin360-visera-s/08.jpg?v=64" draggable="false" alt=""
-               decoding="async" loading="lazy" fetchpriority="low">
-          <img id="bspin2" draggable="false" alt="" aria-hidden="true" decoding="async">
+               decoding="sync" loading="lazy" fetchpriority="low">
+          <!-- Mismo motivo que en la gorra de arriba: `sync` a proposito, no `async`. -->
+          <img id="bspin2" draggable="false" alt="" aria-hidden="true" decoding="sync">
         </div>
 
         <div class="gzoom" id="bzoom">
