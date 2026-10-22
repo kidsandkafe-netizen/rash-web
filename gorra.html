@@ -1255,6 +1255,26 @@
   var stTouch = (window.matchMedia && matchMedia('(hover:none),(pointer:coarse)').matches);  // en tactil, sin parallax
   var mx=0,my=0, tmx=0,tmy=0, t0=null, INTRO=2600, sp=0, spT=0, spH=0;
 
+  /* --- NO MEDIR LO QUE NO SE VE -------------------------------------------------------------
+     `frame` corre en TODOS los fotogramas mientras la pagina este abierta, y dentro pedia
+     `getBoundingClientRect()` del semental y de cada gorra. Esa llamada no es una lectura
+     barata: obliga al navegador a rehacer el calculo de la pagina ENTERA en ese instante para
+     poder contestar. Tres por fotograma son 180 recalculos por segundo, para siempre.
+     En un portatil no se nota. En un movil de gama media, mientras el dedo arrastra la gorra,
+     el hilo principal se atasca y el giro da tirones (comprobado en dos Samsung).
+     El observador marca que hay en pantalla; lo que no lo esta no se mide y no se escribe. Se
+     entra en `true` a proposito: el observador tarda un fotograma en contestar y no queremos
+     que la primera pintada se salte nada. El margen de 200 px hace que la transicion ocurra
+     fuera de la vista, asi que lo que se ve es exactamente igual que antes. */
+  function visible(el){ return !el || el.__viz !== false; }
+  if ('IntersectionObserver' in window){
+    var ioViz = new IntersectionObserver(function(es){
+      es.forEach(function(en){ en.target.__viz = en.isIntersecting; });
+    }, {rootMargin:'200px 0px'});
+    if (stSec) ioViz.observe(stSec);
+    gorras.forEach(function(G){ ioViz.observe(G.vis); });
+  }
+
   function ease(x){return 1-Math.pow(1-x,3);}   // easeOutCubic
 
   // progreso de scroll 0..1 en el primer viewport = cuanto se disuelve el hero
@@ -1335,7 +1355,7 @@
     }
     // UMBRILLIO: ENTRADA DESDE EL FONDO atada al scroll — crece de la profundidad (como el logo "de lejos"),
     // nace de la nada con bloom tardio y la LUZ se enciende con el. Recorrido largo -> se nota mucho.
-    if(stPhoto && stSec){
+    if(stPhoto && stSec && visible(stSec)){
       var r=stSec.getBoundingClientRect(), vh=innerHeight||1;
       var center=r.top + r.height/2;
       var prog=(vh*1.22 - center)/(vh*0.86);       // 0 = aun al fondo · 1 = ya en escena (recorrido largo)
@@ -1374,6 +1394,7 @@
          mismo elemento se aplica antes de mezclar, y no rompe nada. */
     gorras.forEach(function(G){
       var gVis=G.vis, gFilm=G.film, gStage=G.stage;
+      if(!visible(gVis)) return;                  // fuera de pantalla no se mide ni se escribe
       /* El recorrido se mide sobre LA GORRA, no sobre la seccion. En vertical la seccion mide
          1120 px contra 717 de pantalla: su centro llega tardisimo, y la gorra se quedaba en
          pantalla desenfocada media pagina. Con el rectangulo del propio producto la cuenta
@@ -1486,6 +1507,7 @@
       barra = document.getElementById(cfg.barra),
       dial  = document.getElementById(cfg.dial);
   if (!stage || !img || !img2) return;
+  var dialW = 0;        // ancho de la barra de la aguja; se mide a demanda y se guarda
 
   /* --- qué juego de fotos pedir --------------------------------------------------------------
      Hay dos entregas y dos formatos, y la elección se hace aquí una sola vez.
@@ -1745,8 +1767,34 @@
     /* La aguja también deja de ir a saltos: se mueve con el decimal, como la gorra. */
     /* Con arco la aguja mide el recorrido del arco, no la vuelta entera: así llega al final de
        la barra justo cuando la gorra llega al final del tramo. */
-    if (dial) dial.style.left = (ARCO ? (pos - LO) / TRAMO : (vuelve(ent) + dec) / N) * 100 + '%';
+    /* Va por `transform`, no por `left`. `left` es una medida de la página: cambiarla obliga al
+       navegador a recolocar la caja, y eso pasaba en cada micro-movimiento del dedo. `transform`
+       no recoloca nada, lo pinta la tarjeta gráfica aparte.
+       ⚠️ No es un cambio de nombre: `left:40%` es el 40% del ANCHO DE LA BARRA, y
+       `translateX(40%)` sería el 40% de los 26 px de la aguja. Así que el tanto por ciento se
+       pasa a píxeles con el ancho de la barra, que se mide UNA vez y se guarda (y se vuelve a
+       medir sólo si cambia la ventana). El `translateX(-50%)` que ya tenía en el CSS se repite
+       aquí porque el `transform` de JS pisa el del CSS -- es lo que centra la aguja en su sitio. */
+    if (dial){
+      if (!dialW) dialW = (dial.parentNode && dial.parentNode.clientWidth) || 0;
+      var f = (ARCO ? (pos - LO) / TRAMO : (vuelve(ent) + dec) / N);
+      dial.style.transform = 'translateX(' + (f * dialW).toFixed(1) + 'px) translateX(-50%)';
+    }
   }
+  /* --- UNA PINTADA POR FOTOGRAMA, NO UNA POR MOVIMIENTO DEL DEDO ----------------------------
+     La pantalla sólo puede enseñar unos 60 cuadros por segundo, pero el sensor del dedo de un
+     móvil avisa más veces que eso (en los Samsung, hasta el doble). Pintando en cada aviso se
+     hacía trabajo que no se llega a ver, y es ese trabajo de más el que atasca el giro.
+     `pintaPronto` se limita a apuntar "hay que pintar" y pide el turno del siguiente fotograma;
+     si llegan cinco avisos antes de ese turno, se pinta UNA vez, con la última posición del
+     dedo -- que es la única que importa. El movimiento no sale más pobre: sale igual, porque lo
+     que se tiraba eran pintadas que la pantalla nunca llegó a mostrar. */
+  var pidePinta = 0;
+  function pintaPronto(){
+    if (pidePinta) return;
+    pidePinta = requestAnimationFrame(function(){ pidePinta = 0; pinta(); });
+  }
+
   pinta();
   eligeJuego();                 // después de `pinta`, que la usa para repintar con el formato bueno
 
@@ -1903,6 +1951,7 @@
   window.addEventListener('resize', function(){
     ZMAX = topeZoom(); if (z > ZMAX) pon(ZMAX);
     limita(); aplica();
+    dialW = 0; pinta();          // la barra mide otra cosa: se vuelve a medir y se recoloca la aguja
   });
   ZMAX = topeZoom(); aplica();
 
@@ -1987,7 +2036,7 @@
        lados llega solo girando. Lo que no llegaba era lo de arriba y lo de abajo. */
     if (z > 1.001){ ty += e.clientY - yUlt; limita(); aplica(); }
     yUlt = e.clientY;
-    pinta();
+    pintaPronto();
   });
 
   /* --- ENCAJAR al parar ----------------------------------------------------------------------
