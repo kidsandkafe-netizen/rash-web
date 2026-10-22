@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>RASH Ferro · Xanthos y Balios · gorras de edición</title>
-<meta name="description" content="Gorras RASH Ferro hechas por encargo: seis paneles, cabeza de caballo bordada en hilo plata, visera plana o curva. Edición 2026 · 20 unidades. Desde 55 €." />
+<meta name="description" content="Gorras RASH Ferro hechas por encargo: seis paneles, cabeza de caballo bordada en hilo plata, visera plana o curva. Edición 2026. Desde 55 €." />
 <link rel="canonical" href="https://rashferro.com/gorra.html" />
 
 <!-- FICHA AL COMPARTIR EL ENLACE (WhatsApp, Instagram, Telegram, Facebook, Google).
@@ -23,6 +23,55 @@
 <meta property="og:image:alt" content="Gorra RASH negra con la cabeza de caballo bordada en hilo plata" />
 <meta property="og:locale" content="es_ES" />
 <meta name="twitter:card" content="summary_large_image" />
+
+<!-- FICHA DE PRODUCTO PARA GOOGLE (JSON-LD). Es lo que permite que en el buscador salga el
+     precio y la foto debajo del resultado. No se ve en la pagina. Los precios tienen que ser
+     LOS MISMOS que se enseñan abajo (65 y 55): si se cambia uno, se cambia aqui tambien.
+     availability = InStock y no "MadeToOrder" porque Google solo entiende la lista corta
+     (InStock, PreOrder, OutOfStock...); "hecha por encargo" va en la descripcion. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Product",
+      "name": "Gorra Xanthos · RASH Ferro",
+      "image": ["https://rashferro.com/spin360/17.jpg", "https://rashferro.com/img/og-gorra.jpg"],
+      "description": "Gorra de seis paneles de sarga de lana, costura de aguja doble y cabeza de caballo facetada bordada en hilo plata. Visera plana con seis pespuntes y cierre trasero snapback. Hecha por encargo, envío desde España. Edición 2026.",
+      "brand": { "@type": "Brand", "name": "RASH Ferro" },
+      "material": "Sarga de lana",
+      "color": "Negro",
+      "url": "https://rashferro.com/gorra.html#gorra",
+      "offers": {
+        "@type": "Offer",
+        "url": "https://rashferro.com/gorra.html#gorra",
+        "price": "65",
+        "priceCurrency": "EUR",
+        "availability": "https://schema.org/InStock",
+        "itemCondition": "https://schema.org/NewCondition"
+      }
+    },
+    {
+      "@type": "Product",
+      "name": "Gorra Balios · RASH Ferro",
+      "image": ["https://rashferro.com/spin360-visera/08.jpg", "https://rashferro.com/img/og-gorra.jpg"],
+      "description": "Gorra de seis paneles de sarga de poliéster con la cabeza de caballo facetada bordada en hilo plata sobre paño negro. Visera curva, perfil bajo y cierre trasero. Hecha por encargo, envío desde España. Edición 2026.",
+      "brand": { "@type": "Brand", "name": "RASH Ferro" },
+      "material": "Sarga de poliéster",
+      "color": "Negro",
+      "url": "https://rashferro.com/gorra.html#gorra2",
+      "offers": {
+        "@type": "Offer",
+        "url": "https://rashferro.com/gorra.html#gorra2",
+        "price": "55",
+        "priceCurrency": "EUR",
+        "availability": "https://schema.org/InStock",
+        "itemCondition": "https://schema.org/NewCondition"
+      }
+    }
+  ]
+}
+</script>
 
 <!-- ICONO DE LA PESTANA. Estos si van relativos: los pide el propio navegador
      estando ya dentro de la pagina, no un servidor de fuera. -->
@@ -314,7 +363,9 @@
     font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--goldh);
     border-bottom:1px solid transparent;padding-bottom:5px;transition:border-color .45s ease}
   footer .fwa:hover,footer .fwa:focus-visible{border-bottom-color:rgba(190,178,158,.55)}
-  footer .fcopy{font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:rgba(139,135,127,.5)}
+  /* .9 y no .5: a 9 px sobre negro, con .5 el © daba un contraste de 2,2:1 (Lighthouse lo
+     marcaba como ilegible); con .9 sale ~4,8:1 y sigue siendo la línea más discreta del pie. */
+  footer .fcopy{font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:rgba(139,135,127,.9)}
 
   /* ==== SEMENTALES · UMBRILLIO (cinematografica) ==== */
   section.stallion{position:relative;z-index:10;background:#000;
@@ -945,8 +996,11 @@
   <!-- La foto de frente, y a propósito la PEQUEÑA y en JPEG: es la que enseña la gorra en los
        primeros milisegundos, así que lo que se le pide no es resolución sino que llegue ya y no
        falle en ningún navegador. El juego bueno -- 1260 y WebP donde toque -- lo elige
-       el guion en cuanto mide la pantalla, y repinta este mismo hueco. -->
-  <link rel="preload" as="image" href="spin360s/17.jpg" fetchpriority="high">
+       el guion en cuanto mide la pantalla, y repinta este mismo hueco.
+       ⚠️ El `?v=2` tiene que ser EL MISMO que lleva el src del <img id="gspin"> de abajo:
+       sin él la precarga pedía `17.jpg` y el <img> pedía `17.jpg?v=2` = la misma foto dos
+       veces y un aviso en consola de "precarga sin usar" (visto el 22-10-2026). -->
+  <link rel="preload" as="image" href="spin360s/17.jpg?v=2" fetchpriority="high">
 </head>
 <body>
   <div class="bg"></div>
@@ -1017,10 +1071,10 @@
            palabra VERDAD que poner ahi. -->
       <h2>Xanthos <i class="wmk" role="img" aria-label="RASH"></i></h2>
       <div class="grule" aria-hidden="true"></div>
-      <!-- El numero es REAL (20 por modelo, dicho por Barbara el 21-10-2026). Si algun dia se
-           hacen mas, se cambia AQUI y en el de Balios: "20 unidades" es una promesa al que
-           compra, no un adorno. -->
-      <div class="gedic">Edición 2026 · 20 unidades</div>
+      <!-- Aqui ponia "· 20 unidades" (y en el de Balios, y en la description de arriba).
+           Quitado el 22-10-2026 a peticion de Barbara: no quiere prometer un numero. Si algun
+           dia vuelve a haber tirada cerrada, se pone AQUI y en los otros dos sitios a la vez. -->
+      <div class="gedic">Edición 2026</div>
     </header>
 
     <div class="gvis">
@@ -1143,7 +1197,7 @@
     <header class="ghead">
       <h2>Balios <i class="wmk" role="img" aria-label="RASH"></i></h2>
       <div class="grule" aria-hidden="true"></div>
-      <div class="gedic">Edición 2026 · 20 unidades</div>
+      <div class="gedic">Edición 2026</div>
     </header>
 
     <div class="gvis">
@@ -1539,7 +1593,8 @@
      solo numero para las dos: rehacer los cuadros de la gorra 2 obligaba a subirlo, y al
      subirlo se le caia tambien la cache de la gorra 1, que esta aprobada y no se toca.  Ahora
      cada una trae el suyo y se rehace una sin tocar la otra. */
-  var JUEGO = cfg.grande, EXT = '.jpg', VER = cfg.ver || '?v=12', fmtListo = false, enEspera = null;
+  var JUEGO = cfg.grande, EXT = '.jpg', VER = cfg.ver || '?v=12', fmtListo = false, enEspera = null,
+      bastaPeq = false;   // true = el juego pequeño ya llena esta pantalla a 1x (ver eligeJuego)
   function eligeJuego(){
     var pide = (stage.clientWidth || window.innerWidth) * (window.devicePixelRatio || 1);
     /* 700 y no 900: el juego pequeño ya no mide 820 px de ancho sino 630 (los cuadros se
@@ -1548,9 +1603,19 @@
        Eso vale cuando el juego grande es lo único que hay.  Con `sube` en la cfg el umbral ya
        no decide la CALIDAD, sólo el ORDEN: se arranca siempre en pequeño (4,3 MB, gira al
        instante) y el grande entra por detrás y se cambia de una pieza.  La gorra 2 pesa
-       33,5 MB en grande: con 700, un móvil (pide ~1170) se los tragaba ANTES de poder girar.
+       28 MB en grande: con 700, un móvil (pide ~1170) se los tragaba ANTES de poder girar.
        Sin `sube` ni `umbral` en su cfg, la gorra 1 aprobada se queda exactamente en 700. */
     if (cfg.sube || pide <= (cfg.umbral || 700)) JUEGO = cfg.peq;
+    /* 22-10-2026, peso en móvil. Medido en vivo: un móvil se bajaba las 72 grandes de la
+       gorra 2 (28 MB) sin que nadie las necesitara -- a escala 1 el juego pequeño (1017 px)
+       ya cubre de sobra una pantalla de 375-412 px, aunque sea a 2,6x de densidad (pide
+       ~1000-1080). Las grandes sólo se notan al AMPLIAR, y al ampliar `pon()` ya llama a
+       subeCalidad() por su cuenta. Así que si el pequeño llena la pantalla con un 25% de
+       margen, las grandes se quedan sin pedir hasta que alguien pulse + o pellizque.
+       En un monitor (pide 1600-1800) el pequeño se quedaría blando a 1x y se sigue subiendo
+       solo, como antes: ahí no cambia nada. El 1,25 es el mismo criterio que el 700 de la
+       gorra 1 (700 / 630 = 1,11): un poco de upscale no se ve, mucho sí. */
+    bastaPeq = !!cfg.sube && pide <= (cfg.ancho / 2) * 1.25;
     function resuelve(webp){
       if (fmtListo) return;                   // el que llegue primero manda; el otro no hace nada
       if (webp) EXT = '.webp';
@@ -1616,8 +1681,10 @@
           /* Con el juego pequeño encendido ya se puede girar, así que a partir de aquí las
              grandes no le quitan el turno a nadie: se bajan por detrás y subeCalidad() las
              cambia de una pieza cuando están todas.  Sin `sube` en su cfg esto no corre, o
-             sea que la gorra 1 aprobada sigue pidiendo las grandes sólo al ampliar. */
-          if (cfg.sube && JUEGO === cfg.peq) setTimeout(subeCalidad, 400);
+             sea que la gorra 1 aprobada sigue pidiendo las grandes sólo al ampliar.
+             Con `bastaPeq` (móvil: el pequeño ya llena la pantalla) tampoco corre: las
+             grandes llegarán cuando alguien amplíe, por `pon()`. Ver eligeJuego(). */
+          if (cfg.sube && JUEGO === cfg.peq && !bastaPeq) setTimeout(subeCalidad, 400);
         }
       };
       im.src = src(ARCO ? vuelve(LO + i) : i);
@@ -2232,9 +2299,11 @@
     stage:'bstage', img:'bspin', img2:'bspin2', barra:'bcarga', dial:'bdial',
     film:'bfilm', zoom:'bzoom', mas:'bmas', menos:'bmenos', niv:'bniv',
     cta:'bcta', nota:'bnota',
-    /* sube: arranca en el juego pequeño (1017 px, 4,3 MB) y sube al grande (2034 px, 33,5 MB)
-       en cuanto el pequeño está girando.  Así nadie espera 33 MB para mover la gorra y la
-       calidad final es la misma.  La gorra 1 no lleva esta clave y no cambia en nada. */
+    /* sube: arranca en el juego pequeño (1017 px, 4,3 MB) y sube al grande (2034 px, 28 MB)
+       en cuanto el pequeño está girando -- EN MONITOR. En móvil (desde el 22-10-2026) el
+       pequeño ya llena la pantalla y las grandes se piden sólo al ampliar: ver `bastaPeq`
+       en eligeJuego(). Así nadie espera 28 MB para mover la gorra y la calidad al ampliar
+       es la misma.  La gorra 1 no lleva esta clave y no cambia en nada. */
     ver:'?v=64', grande:'spin360-visera', peq:'spin360-visera-s', ancho:2034, frente:8, foco:0.369,
     sube:true,
     /* evita: cuadros donde no se puede quedar parada, por el bordado roto de la copa.

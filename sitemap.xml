@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Mapa del sitio para Google. Solo las dos paginas de verdad: index.html no va porque es
+     una puerta (noindex) que salta a gorra.html. Si se cambia gorra.html, actualizar lastmod
+     (fecha del dia, AAAA-MM-DD) para que Google vuelva a pasar antes. -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <url>
+    <loc>https://rashferro.com/gorra.html</loc>
+    <lastmod>2026-10-22</lastmod>
+    <image:image>
+      <image:loc>https://rashferro.com/img/og-gorra.jpg</image:loc>
+      <image:title>Gorra RASH Ferro · cabeza de caballo bordada en hilo plata</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://rashferro.com/caballos.html</loc>
+  </url>
+</urlset>

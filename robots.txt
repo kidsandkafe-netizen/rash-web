@@ -1,0 +1,7 @@
+# rashferro.com — todo se puede indexar.
+# Las carpetas de fotos del giro (spin360*) NO se bloquean a proposito: Google tiene que
+# poder verlas para entender la pagina de la gorra. Bloquearlas no ahorra nada.
+User-agent: *
+Allow: /
+
+Sitemap: https://rashferro.com/sitemap.xml
